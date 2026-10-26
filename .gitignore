@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+/Backgrounds
+/Icons
+/logs/
+dist/
+*.zip
+*.sha256
+.lumen_initialized*

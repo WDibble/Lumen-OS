@@ -1,0 +1,27 @@
+{
+  "label": "Nintendo 64",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "38BDF8",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/N64",
+  "imgpath": "../../Imgs/N64",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "z64|n64|v64|zip|7z",
+  "launchlist": [
+    {
+      "name": "Mupen64Plus (Glide64mk2 - High Quality)",
+      "launch": "launch.sh glide"
+    },
+    {
+      "name": "Mupen64Plus (Rice - Fast)",
+      "launch": "launch.sh rice"
+    },
+    {
+      "name": "ParaLLEl N64 (RetroArch Core)",
+      "launch": "launch.sh paralleln64_libretro.so"
+    }
+  ]
+}

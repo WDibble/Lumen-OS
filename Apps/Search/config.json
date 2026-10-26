@@ -1,0 +1,6 @@
+{
+  "label": "Search Games",
+  "icon": "icon.png",
+  "launch": "launch.sh",
+  "description": "Cross-console instant game finder"
+}

@@ -1,0 +1,39 @@
+{
+  "name": "Lumen",
+  "preview": "preview.png",
+  "font": "wqy-microhei.ttf",
+  "fontascii": "wqy-microhei.ttf",
+  "fontsize": {
+    "nav_font1": 24,
+    "nav_font2": 24,
+    "content_font1": 30,
+    "content_font2": 22,
+    "content_font3": 38,
+    "content_font4": 28,
+    "content_font5": 36,
+    "content_font6": 24,
+    "stat_font1": 20,
+    "menu_font1": 28,
+    "popup_font1": 36,
+    "popup_font2": 28,
+    "popup_font3": 28
+  },
+  "fontcolor": {
+    "nav_color1": "#FFB0BED0",
+    "nav_color2": "#FFF8FAFC",
+    "nav_color3": "#FF38BDF8",
+    "content_color1": "#FFF8FAFC",
+    "content_color2": "#FFB0BED0",
+    "content_color3": "#FFCBD5E1",
+    "content_color4": "#FF38BDF8",
+    "stat_color1": "#FFF8FAFC",
+    "stat_color2": "#FFB0BED0",
+    "menu_color1": "#FFF8FAFC",
+    "menu_color2": "#FF38BDF8",
+    "popup_color1": "#FFF8FAFC",
+    "popup_color2": "#FFB0BED0",
+    "popup_color3": "#FF38BDF8",
+    "highlight_color1": "#FF38BDF8",
+    "shadow_color1": "#E60F172A"
+  }
+}

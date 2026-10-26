@@ -1,0 +1,21 @@
+{
+  "label": "NGP",
+  "icon": "icon.png",
+  "iconsmall": "ic-NGP-80-n.png",
+  "iconlist": "ic-NGP-32-n.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/NGP.png",
+  "themecolor": "FFFFFF",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/NGP",
+  "imgpath": "../../Imgs/NGP",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "ngc|ngp|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

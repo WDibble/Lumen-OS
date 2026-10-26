@@ -1,0 +1,21 @@
+{
+  "label": "MEGADUCK",
+  "icon": "icon.png",
+  "iconsmall": "",
+  "iconlist": "",
+  "background": "/mnt/SDCARD/Backgrounds/Default/MEGADUCK.png",
+  "themecolor": "FF0000",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/MEGADUCK",
+  "imgpath": "../../Imgs/MEGADUCK",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "bin|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "label": "Sega Dreamcast",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "38BDF8",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/DC",
+  "imgpath": "../../Imgs/DC",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "cdi|gdi|chd|iso|zip|7z",
+  "launchlist": [
+    {
+      "name": "Flycast v2.4 (Standalone)",
+      "launch": "launch.sh"
+    },
+    {
+      "name": "Flycast (RetroArch Core)",
+      "launch": "launch.sh flycast_libretro.so"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "label": "N. VIRT. BOY",
+  "icon": "icon.png",
+  "iconsmall": "",
+  "iconlist": "",
+  "background": "/mnt/SDCARD/Backgrounds/Default/VB.png",
+  "themecolor": "FFFF88",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/VB",
+  "imgpath": "../../Imgs/VB",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "vb|vboy|bin|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

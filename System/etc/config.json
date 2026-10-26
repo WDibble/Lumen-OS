@@ -1,0 +1,37 @@
+{
+  "theme": "Lumen",
+  "led": {
+    "default_hex": "002244",
+    "brightness": 100
+  },
+  "cpu": {
+    "default_profile": "normal",
+    "governor": "ondemand",
+    "min_freq": 816000,
+    "max_freq": 1608000
+  },
+  "services": {
+    "ssh": true,
+    "sftp": true,
+    "samba": false,
+    "avahi": true,
+    "telnet": false,
+    "syncthing": false
+  },
+  "input": {
+    "swap_ab": false,
+    "polling_rate_hz": 250
+  },
+  "network": {
+    "hostname": "trimui",
+    "samba_workgroup": "WORKGROUP"
+  },
+  "retroachievements": {
+    "enabled": false,
+    "username": "",
+    "token": "",
+    "hardcore_mode": false,
+    "leaderboards": true
+  },
+  "resume_at_boot": 1
+}

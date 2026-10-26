@@ -1,0 +1,258 @@
+#!/bin/sh
+# Lumen-OS Unified Hardware Tool (next-hw)
+# Clean POSIX hardware abstraction for TrimUI Smart Pro
+
+set -e
+
+LED_SYSFS="/sys/class/led_anim"
+CPU_SYSFS="/sys/devices/system/cpu"
+DISP_SYSFS="/sys/kernel/debug/dispdbg"
+STATE_DIR="/tmp/lumen/state"
+mkdir -p "$STATE_DIR"
+
+usage() {
+    cat <<EOF
+Usage: next-hw <subsystem> [options]
+
+Subsystems:
+  led
+    --hex <RRGGBB>        Set stick LED color
+    --mode <battery|breathe|off>  Set dynamic LED operating mode
+    --brightness <0-100>  Set stick LED brightness scale
+    --cycles <N>          Set pulse cycles
+    --duration <ms>       Set pulse duration
+    --off                 Turn off LEDs
+
+  cpu
+    --profile <powersave|normal|performance>
+    --gov <governor> --min <min_khz> --max <max_khz>
+    --status              Show current CPU scaling status
+
+  display
+    --brightness <0-100>  Set LCD brightness (mapped 10-250)
+    --blank <0|1>         Blank (1) or unblank (0) display
+
+  button
+    --check <NAME>        Check if button is pressed (A, B, X, Y, MENU, START, SELECT)
+
+  power
+    sleep                 Save hardware state and enter low power mode
+    wake                  Restore hardware state from sleep
+EOF
+    exit 1
+}
+
+# --- LED SUBSYSTEM ---
+handle_led() {
+    [ -d "$LED_SYSFS" ] || { echo "next-hw: LED sysfs not found." >&2; return 1; }
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --hex)
+                HEX="$2"; shift 2
+                echo "$HEX" > "$STATE_DIR/last_led_hex" 2>/dev/null || true
+                echo 1 > "$LED_SYSFS/effect_enable"
+                echo "$HEX" > "$LED_SYSFS/effect_rgb_hex_lr"
+                ;;
+            --mode)
+                MODE="$2"; shift 2
+                case "$MODE" in
+                    battery)
+                        CAP=100
+                        for node in /sys/class/power_supply/*/capacity; do
+                            [ -f "$node" ] && CAP=$(cat "$node" 2>/dev/null) && break
+                        done
+                        case "$CAP" in
+                            *[!0-9]*|"") CAP=100 ;;
+                        esac
+                        if [ "$CAP" -ge 70 ]; then
+                            HEX="10B981" # Green
+                        elif [ "$CAP" -ge 30 ]; then
+                            HEX="FBBF24" # Yellow
+                        elif [ "$CAP" -ge 15 ]; then
+                            HEX="F97316" # Orange
+                        else
+                            HEX="EF4444" # Red
+                        fi
+                        echo "$HEX" > "$STATE_DIR/last_led_hex" 2>/dev/null || true
+                        echo 1 > "$LED_SYSFS/effect_enable"
+                        echo "$HEX" > "$LED_SYSFS/effect_rgb_hex_lr"
+                        ;;
+                    breathe|pulse)
+                        echo 1 > "$LED_SYSFS/effect_enable"
+                        echo 2 > "$LED_SYSFS/effect_cycles_lr" 2>/dev/null || true
+                        ;;
+                    off)
+                        echo 0 > "$LED_SYSFS/effect_enable"
+                        ;;
+                esac
+                ;;
+            --brightness)
+                SCALE="$2"; shift 2
+                echo "$SCALE" > "$LED_SYSFS/max_scale"
+                ;;
+            --cycles)
+                CYCLES="$2"; shift 2
+                echo "$CYCLES" > "$LED_SYSFS/effect_cycles_lr"
+                ;;
+            --duration)
+                DUR="$2"; shift 2
+                echo "$DUR" > "$LED_SYSFS/effect_duration_lr"
+                ;;
+            --off)
+                echo 0 > "$LED_SYSFS/effect_enable"
+                shift
+                ;;
+            *)
+                echo "Unknown led option: $1" >&2; return 1
+                ;;
+        esac
+    done
+}
+
+# --- CPU SUBSYSTEM ---
+handle_cpu() {
+    CPU0="$CPU_SYSFS/cpu0/cpufreq"
+    [ -d "$CPU0" ] || { echo "next-hw: CPU freq sysfs not found." >&2; return 1; }
+
+    # Helper: write frequencies with safe ordering to prevent -EINVAL (min > max)
+    set_freqs() {
+        TARGET_MIN="$1"
+        TARGET_MAX="$2"
+        # Raise max first if new max is greater than target min, or lower min first
+        echo "$TARGET_MAX" > "$CPU0/scaling_max_freq" 2>/dev/null || true
+        echo "$TARGET_MIN" > "$CPU0/scaling_min_freq" 2>/dev/null || true
+        echo "$TARGET_MAX" > "$CPU0/scaling_max_freq" 2>/dev/null || true
+    }
+
+    case "$1" in
+        --profile)
+            case "$2" in
+                powersave)
+                    echo powersave > "$CPU0/scaling_governor" 2>/dev/null || true
+                    set_freqs 408000 816000
+                    ;;
+                normal)
+                    set_freqs 816000 1608000
+                    echo ondemand > "$CPU0/scaling_governor" 2>/dev/null || true
+                    ;;
+                performance)
+                    set_freqs 1200000 1800000
+                    echo performance > "$CPU0/scaling_governor" 2>/dev/null || true
+                    ;;
+                *)
+                    echo "Unknown profile: $2" >&2; return 1
+                    ;;
+            esac
+            ;;
+        --gov)
+            GOV="$2"; MIN="$4"; MAX="$6"
+            [ -n "$MIN" ] && [ -n "$MAX" ] && set_freqs "$MIN" "$MAX"
+            [ -n "$GOV" ] && echo "$GOV" > "$CPU0/scaling_governor" 2>/dev/null || true
+            ;;
+        --status)
+            echo "Governor: $(cat $CPU0/scaling_governor)"
+            echo "Min Freq: $(cat $CPU0/scaling_min_freq) kHz"
+            echo "Max Freq: $(cat $CPU0/scaling_max_freq) kHz"
+            ;;
+        *)
+            echo "Unknown cpu option: $1" >&2; return 1
+            ;;
+    esac
+}
+
+# --- DISPLAY SUBSYSTEM ---
+handle_display() {
+    [ -d "$DISP_SYSFS" ] || { echo "next-hw: Display debug sysfs not found." >&2; return 1; }
+    case "$1" in
+        --brightness)
+            PERCENT="$2"
+            LCD_VAL=$(( 10 + (PERCENT * 240) / 100 ))
+            echo "$PERCENT" > "$STATE_DIR/last_brightness" 2>/dev/null || true
+            cd "$DISP_SYSFS"
+            echo lcd0 > name
+            echo setbl > command
+            echo "$LCD_VAL" > param
+            echo 1 > start
+            ;;
+        --blank)
+            cd "$DISP_SYSFS"
+            echo lcd0 > name
+            if [ "$2" = "1" ]; then
+                echo blank > command
+            else
+                echo unblank > command
+            fi
+            echo 1 > start
+            ;;
+        *)
+            echo "Unknown display option: $1" >&2; return 1
+            ;;
+    esac
+}
+
+# --- BUTTON QUERY SUBSYSTEM ---
+handle_button() {
+    BTN="$2"
+    EVDEV="/dev/input/event3"
+    [ -e "$EVDEV" ] || { echo "next-hw: Input device $EVDEV not present." >&2; return 1; }
+
+    CODE=""
+    TYPE="1"
+    case "$BTN" in
+        A) CODE="305" ;;
+        B) CODE="304" ;;
+        X) CODE="308" ;;
+        Y) CODE="307" ;;
+        L) CODE="310" ;;
+        R) CODE="311" ;;
+        SELECT) CODE="314" ;;
+        START) CODE="315" ;;
+        MENU) CODE="316" ;;
+        FN) TYPE="5"; CODE="1" ;;
+        *) echo "Unknown button: $BTN" >&2; return 1 ;;
+    esac
+
+    if command -v evtest >/dev/null 2>&1; then
+        evtest --query "$EVDEV" "$TYPE" "$CODE" >/dev/null 2>&1
+        [ $? -eq 10 ] && return 0 || return 1
+    fi
+    return 1
+}
+
+# --- POWER LIFECYCLE ---
+handle_power() {
+    case "$1" in
+        sleep)
+            /mnt/SDCARD/System/bin/sleep_guard.sh sleep --no-suspend 2>/dev/null || true
+            handle_display --blank 1 || true
+            handle_cpu --profile powersave || true
+            handle_led --off || true
+            ;;
+        wake)
+            handle_display --blank 0 || true
+            handle_cpu --profile normal || true
+            if [ -f "$STATE_DIR/last_led_hex" ]; then
+                handle_led --hex "$(cat $STATE_DIR/last_led_hex)" || true
+            else
+                handle_led --hex 002244 || true
+            fi
+            /mnt/SDCARD/System/bin/sleep_guard.sh wake 2>/dev/null || true
+            ;;
+        *)
+            echo "Unknown power action: $1" >&2; return 1
+            ;;
+    esac
+}
+
+# --- DISPATCH ---
+[ $# -eq 0 ] && usage
+
+COMMAND="$1"; shift
+case "$COMMAND" in
+    led) handle_led "$@" ;;
+    cpu) handle_cpu "$@" ;;
+    display) handle_display "$@" ;;
+    button) handle_button "$@" ;;
+    power) handle_power "$@" ;;
+    *) usage ;;
+esac

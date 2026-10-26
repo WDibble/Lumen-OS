@@ -1,0 +1,21 @@
+{
+  "label": "ZQUEST",
+  "icon": "icon.png",
+  "iconsmall": "",
+  "iconlist": "",
+  "background": "/mnt/SDCARD/Backgrounds/Default/ZQUEST.png",
+  "themecolor": "FFFF88",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/ZQUEST",
+  "imgpath": "../../Imgs/ZQUEST",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "qst|zip|launch",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

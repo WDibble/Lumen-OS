@@ -1,0 +1,19 @@
+#!/bin/sh
+# Lumen-OS Central Environment & Runtime Configuration (ex_config)
+# Used by PortMaster, standalone utilities, and native apps
+
+export SDCARD_PATH="/mnt/SDCARD"
+export PATH="/mnt/SDCARD/System/bin:/mnt/SDCARD/System/usr/trimui/scripts:$PATH"
+export LD_LIBRARY_PATH="/mnt/SDCARD/System/lib:/mnt/SDCARD/System/lib/samba:/usr/trimui/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export EX_CONFIG_PATH="/mnt/SDCARD/System/etc"
+export EX_RESOURCE_PATH="/mnt/SDCARD/System/resources"
+
+# Zero NAND Mutation Invariant: redirect all home/config/cache to SD card and RAM tmpfs
+export HOME="/mnt/SDCARD/.home"
+export XDG_CONFIG_HOME="/mnt/SDCARD/.config"
+export XDG_DATA_HOME="/mnt/SDCARD/.local/share"
+export XDG_CACHE_HOME="/tmp/lumen/cache"
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPYCACHEPREFIX="/tmp/lumen/pycache"
+
+mkdir -p "$HOME" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$PYTHONPYCACHEPREFIX"

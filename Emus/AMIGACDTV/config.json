@@ -1,0 +1,19 @@
+{
+  "label": "AMIGA CDTV",
+  "icon": "icon.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/AMIGACDTV.png",
+  "iconsel": "",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/AMIGACDTV",
+  "imgpath": "../../Imgs/AMIGACDTV",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

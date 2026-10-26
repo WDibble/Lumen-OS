@@ -1,0 +1,19 @@
+{
+  "label": "NGC",
+  "icon": "icon.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/NGC.png",
+  "iconsel": "",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/NGC",
+  "imgpath": "../../Imgs/NGC",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "ngp|ngc|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

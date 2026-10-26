@@ -1,0 +1,19 @@
+{
+  "label": "WS",
+  "icon": "icon.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/WS.png",
+  "iconsel": "",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/WS",
+  "imgpath": "../../Imgs/WS",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "pc2|wsc|ws|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

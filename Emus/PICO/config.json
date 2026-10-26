@@ -1,0 +1,19 @@
+{
+  "label": "PICO-8",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "F43F5E",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/PICO",
+  "imgpath": "../../Imgs/PICO",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "p8|png|zip",
+  "launchlist": [
+    {
+      "name": "Default (retro8)",
+      "launch": "launch.sh"
+    }
+  ]
+}

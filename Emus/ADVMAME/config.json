@@ -1,0 +1,21 @@
+{
+  "label": "ADV. MAME",
+  "icon": "icon.png",
+  "iconsmall": "ic-advmame-small.png",
+  "iconlist": "ic-advmame-list.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/ADVMAME.png",
+  "themecolor": "00CCFF",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/ADVMAME",
+  "imgpath": "../../Imgs/ADVMAME",
+  "useswap": 1,
+  "shortname": 1,
+  "hidebios": 1,
+  "extlist": "zip",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "label": "VECTREX",
+  "icon": "icon.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/VECTREX.png",
+  "iconsel": "",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/VECTREX",
+  "imgpath": "../../Imgs/VECTREX",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

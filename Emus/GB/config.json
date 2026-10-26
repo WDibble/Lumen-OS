@@ -1,0 +1,19 @@
+{
+  "label": "Game Boy",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "A3E635",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/GB",
+  "imgpath": "../../Imgs/GB",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "gb|dmg|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default (gambatte)",
+      "launch": "launch.sh"
+    }
+  ]
+}

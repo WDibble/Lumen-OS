@@ -1,0 +1,6 @@
+{
+  "label": "USB Storage",
+  "icon": "icon.png",
+  "launch": "launch.sh",
+  "description": "Mount MicroSD as USB Mass Storage on PC/Mac"
+}

@@ -1,0 +1,19 @@
+{
+  "label": "SEGA 32X",
+  "icon": "icon.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/SEGA32X.png",
+  "iconsel": "",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/SEGA32X",
+  "imgpath": "../../Imgs/SEGA32X",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "gen|smd|md|32x|bin|iso|sms|68k|chd|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "label": "BIOS Doctor",
+  "icon": "/mnt/SDCARD/Apps/SystemChecker/icon.png",
+  "launch": "launch.sh"
+}

@@ -1,0 +1,898 @@
+[
+  {
+    "id": "ADVMAME",
+    "label": "ADV. MAME",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#00CCFF",
+    "icon": "/Emus/ADVMAME/icon.png"
+  },
+  {
+    "id": "AMIGA",
+    "label": "AMIGA",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/AMIGA/icon.png"
+  },
+  {
+    "id": "AMIGACD",
+    "label": "AMIGA CD32",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/AMIGACD/icon.png"
+  },
+  {
+    "id": "AMIGACDTV",
+    "label": "AMIGA CDTV",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/AMIGACDTV/icon.png"
+  },
+  {
+    "id": "ARDUBOY",
+    "label": "ARDUBOY",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/ARDUBOY/icon.png"
+  },
+  {
+    "id": "ATARI2600",
+    "label": "Atari 2600",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#CA8A04",
+    "icon": "/Emus/ATARI2600/icon.png"
+  },
+  {
+    "id": "ATARI5200",
+    "label": "ATARI 5200",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#A569BD",
+    "icon": "/Emus/ATARI5200/icon.png"
+  },
+  {
+    "id": "ATARI7800",
+    "label": "ATARI 7800",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#A569BD",
+    "icon": "/Emus/ATARI7800/icon.png"
+  },
+  {
+    "id": "ATARI800",
+    "label": "ATARI 800",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#AF7AC5",
+    "icon": "/Emus/ATARI800/icon.png"
+  },
+  {
+    "id": "ATARIST",
+    "label": "ATARIST",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/ATARIST/icon.png"
+  },
+  {
+    "id": "ATOMISWAVE",
+    "label": "ATOMISWAVE",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFFFF",
+    "icon": "/Emus/ATOMISWAVE/icon.png"
+  },
+  {
+    "id": "C64",
+    "label": "C64",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/C64/icon.png"
+  },
+  {
+    "id": "CANNONBALL",
+    "label": "CANNONBALL",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/CANNONBALL/icon.png"
+  },
+  {
+    "id": "CAVESTORY",
+    "label": "CAVESTORY",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/CAVESTORY/icon.png"
+  },
+  {
+    "id": "CHAILOVE",
+    "label": "CHAILOVE",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#AF7AC5",
+    "icon": "/Emus/CHAILOVE/icon.png"
+  },
+  {
+    "id": "CHANNELF",
+    "label": "CHANNELF",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/CHANNELF/icon.png"
+  },
+  {
+    "id": "COLECO",
+    "label": "COLECO",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/COLECO/icon.png"
+  },
+  {
+    "id": "COLSGM",
+    "label": "COLSGM",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/COLSGM/icon.png"
+  },
+  {
+    "id": "CPC",
+    "label": "AMSTRAD CPC",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/CPC/icon.png"
+  },
+  {
+    "id": "CPET",
+    "label": "CPET",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/CPET/icon.png"
+  },
+  {
+    "id": "CPLUS4",
+    "label": "CPLUS4",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/CPLUS4/icon.png"
+  },
+  {
+    "id": "CPS1",
+    "label": "Capcom Play System 1",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#E11D48",
+    "icon": "/Emus/CPS1/icon.png"
+  },
+  {
+    "id": "CPS2",
+    "label": "Capcom Play System 2",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#2563EB",
+    "icon": "/Emus/CPS2/icon.png"
+  },
+  {
+    "id": "CPS3",
+    "label": "Capcom Play System 3",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#D97706",
+    "icon": "/Emus/CPS3/icon.png"
+  },
+  {
+    "id": "DAPHNE",
+    "label": "DAPHNE",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/DAPHNE/icon.png"
+  },
+  {
+    "id": "DC",
+    "label": "Sega Dreamcast",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/DC/icon.png"
+  },
+  {
+    "id": "DINOTHAWR",
+    "label": "DINOTHAWR",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/DINOTHAWR/icon.png"
+  },
+  {
+    "id": "DOOM",
+    "label": "DOOM",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/DOOM/icon.png"
+  },
+  {
+    "id": "DOS",
+    "label": "DOS",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/DOS/icon.png"
+  },
+  {
+    "id": "EASYRPG",
+    "label": "EASYRPG",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/EASYRPG/icon.png"
+  },
+  {
+    "id": "ENTERPRISE",
+    "label": "ENTERPRISE",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/ENTERPRISE/icon.png"
+  },
+  {
+    "id": "FBNEO",
+    "label": "FinalBurn Neo (Arcade)",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#14B8A6",
+    "icon": "/Emus/FBNEO/icon.png"
+  },
+  {
+    "id": "FC",
+    "label": "NES / Famicom",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#EF4444",
+    "icon": "/Emus/FC/icon.png"
+  },
+  {
+    "id": "FDS",
+    "label": "N. FDS",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/FDS/icon.png"
+  },
+  {
+    "id": "FLASHBACK",
+    "label": "FLASHBACK",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/FLASHBACK/icon.png"
+  },
+  {
+    "id": "GB",
+    "label": "Game Boy",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#A3E635",
+    "icon": "/Emus/GB/icon.png"
+  },
+  {
+    "id": "GBA",
+    "label": "Game Boy Advance",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/GBA/icon.png"
+  },
+  {
+    "id": "GBC",
+    "label": "Game Boy Color",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#F43F5E",
+    "icon": "/Emus/GBC/icon.png"
+  },
+  {
+    "id": "GG",
+    "label": "Sega Game Gear",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#F97316",
+    "icon": "/Emus/GG/icon.png"
+  },
+  {
+    "id": "GW",
+    "label": "GAME&WATCH",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/GW/icon.png"
+  },
+  {
+    "id": "INTELLIVISION",
+    "label": "INTELLIVISION",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/INTELLIVISION/icon.png"
+  },
+  {
+    "id": "JAVA",
+    "label": "JAVA",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#CD6155",
+    "icon": "/Emus/JAVA/icon.png"
+  },
+  {
+    "id": "LOWRESNX",
+    "label": "LowRes NX",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/LOWRESNX/icon.png"
+  },
+  {
+    "id": "LUTRO",
+    "label": "LUTRO",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/LUTRO/icon.png"
+  },
+  {
+    "id": "LYNX",
+    "label": "ATARI LYNX",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/LYNX/icon.png"
+  },
+  {
+    "id": "MAME",
+    "label": "MAME (Arcade)",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#64748B",
+    "icon": "/Emus/MAME/icon.png"
+  },
+  {
+    "id": "MAME2003PLUS",
+    "label": "ARC. MAME",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#00CCFF",
+    "icon": "/Emus/MAME2003PLUS/icon.png"
+  },
+  {
+    "id": "MAME2010",
+    "label": "AR. MAME2010",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#00CCFF",
+    "icon": "/Emus/MAME2010/icon.png"
+  },
+  {
+    "id": "MD",
+    "label": "Sega Mega Drive / Genesis",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#0284C7",
+    "icon": "/Emus/MD/icon.png"
+  },
+  {
+    "id": "MDMSU",
+    "label": "SEGA MD MSU",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#0088CF",
+    "icon": "/Emus/MDMSU/icon.png"
+  },
+  {
+    "id": "MEGADUCK",
+    "label": "MEGADUCK",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FF0000",
+    "icon": "/Emus/MEGADUCK/icon.png"
+  },
+  {
+    "id": "MS",
+    "label": "Sega Master System",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#06B6D4",
+    "icon": "/Emus/MS/icon.png"
+  },
+  {
+    "id": "MSX",
+    "label": "MSX",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/MSX/icon.png"
+  },
+  {
+    "id": "MSX2",
+    "label": "MSX 2",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/MSX2/icon.png"
+  },
+  {
+    "id": "MUSIC",
+    "label": "MUSIC",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#DDEEFF",
+    "icon": "/Emus/MUSIC/icon.png"
+  },
+  {
+    "id": "N64",
+    "label": "Nintendo 64",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/N64/icon.png"
+  },
+  {
+    "id": "N64DD",
+    "label": "N. N64DD",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/N64DD/icon.png"
+  },
+  {
+    "id": "NAOMI",
+    "label": "NAOMI",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFFFF",
+    "icon": "/Emus/NAOMI/icon.png"
+  },
+  {
+    "id": "NDS",
+    "label": "Nintendo DS",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/NDS/icon.png"
+  },
+  {
+    "id": "NEOCD",
+    "label": "NEOCD",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/NEOCD/icon.png"
+  },
+  {
+    "id": "NEOGEO",
+    "label": "SNK Neo Geo",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#EAB308",
+    "icon": "/Emus/NEOGEO/icon.png"
+  },
+  {
+    "id": "NGC",
+    "label": "NGC",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/NGC/icon.png"
+  },
+  {
+    "id": "NGP",
+    "label": "NGP",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFFFF",
+    "icon": "/Emus/NGP/icon.png"
+  },
+  {
+    "id": "OPENBOR",
+    "label": "OpenBOR",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/OPENBOR/icon.png"
+  },
+  {
+    "id": "PALMOS",
+    "label": "PALMOS",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/PALMOS/icon.png"
+  },
+  {
+    "id": "PANASONIC",
+    "label": "3DO",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/PANASONIC/icon.png"
+  },
+  {
+    "id": "PC88",
+    "label": "PC88",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#0000FF",
+    "icon": "/Emus/PC88/icon.png"
+  },
+  {
+    "id": "PC98",
+    "label": "PC98",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#0000FF",
+    "icon": "/Emus/PC98/icon.png"
+  },
+  {
+    "id": "PCE",
+    "label": "PC Engine / TurboGrafx-16",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#EC4899",
+    "icon": "/Emus/PCE/icon.png"
+  },
+  {
+    "id": "PCECD",
+    "label": "PCE CD",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/PCECD/icon.png"
+  },
+  {
+    "id": "PCFX",
+    "label": "PCFX",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/PCFX/icon.png"
+  },
+  {
+    "id": "PGM",
+    "label": "PGM",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FAF792",
+    "icon": "/Emus/PGM/icon.png"
+  },
+  {
+    "id": "PICO",
+    "label": "PICO-8",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#F43F5E",
+    "icon": "/Emus/PICO/icon.png"
+  },
+  {
+    "id": "POKEMINI",
+    "label": "N. POKEMINI",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/POKEMINI/icon.png"
+  },
+  {
+    "id": "PORTS",
+    "label": "PORTS",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#61A8DD",
+    "icon": "/Emus/PORTS/icon.png"
+  },
+  {
+    "id": "PS",
+    "label": "Sony PlayStation",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#60A5FA",
+    "icon": "/Emus/PS/icon.png"
+  },
+  {
+    "id": "PSP",
+    "label": "Sony PlayStation Portable",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/PSP/icon.png"
+  },
+  {
+    "id": "PSPMINIS",
+    "label": "PSPMINIS",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#64A8BD",
+    "icon": "/Emus/PSPMINIS/icon.png"
+  },
+  {
+    "id": "SATELLAVIEW",
+    "label": "SATELLAVIEW",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FF0000",
+    "icon": "/Emus/SATELLAVIEW/icon.png"
+  },
+  {
+    "id": "SATURN",
+    "label": "SEGA SATURN",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/SATURN/icon.png"
+  },
+  {
+    "id": "SCUMMVM",
+    "label": "SCUMMVM",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#00D300",
+    "icon": "/Emus/SCUMMVM/icon.png"
+  },
+  {
+    "id": "SEGA32X",
+    "label": "SEGA 32X",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/SEGA32X/icon.png"
+  },
+  {
+    "id": "SEGACD",
+    "label": "SEGA CD",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/SEGACD/icon.png"
+  },
+  {
+    "id": "SFC",
+    "label": "SNES / Super Famicom",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#818CF8",
+    "icon": "/Emus/SFC/icon.png"
+  },
+  {
+    "id": "SFCMSU",
+    "label": "N. SNES MSU",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FF0000",
+    "icon": "/Emus/SFCMSU/icon.png"
+  },
+  {
+    "id": "SFX",
+    "label": "SFX",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/SFX/icon.png"
+  },
+  {
+    "id": "SG1000",
+    "label": "SEGA SG-1000",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/SG1000/icon.png"
+  },
+  {
+    "id": "SGB",
+    "label": "N. SUPER GB",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/SGB/icon.png"
+  },
+  {
+    "id": "SUFAMI",
+    "label": "SUFAMI",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FF0000",
+    "icon": "/Emus/SUFAMI/icon.png"
+  },
+  {
+    "id": "SUPERVISION",
+    "label": "SUPERVISION",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FF0000",
+    "icon": "/Emus/SUPERVISION/icon.png"
+  },
+  {
+    "id": "THOMSON",
+    "label": "THOMSON",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/THOMSON/icon.png"
+  },
+  {
+    "id": "TI83",
+    "label": "TI83",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#0000FF",
+    "icon": "/Emus/TI83/icon.png"
+  },
+  {
+    "id": "TIC",
+    "label": "TIC80",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/TIC/icon.png"
+  },
+  {
+    "id": "TYRQUAKE",
+    "label": "TYRQUAKE",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/TYRQUAKE/icon.png"
+  },
+  {
+    "id": "UZEBOX",
+    "label": "UZEBOX",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/UZEBOX/icon.png"
+  },
+  {
+    "id": "VB",
+    "label": "N. VIRT. BOY",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/VB/icon.png"
+  },
+  {
+    "id": "VECTREX",
+    "label": "VECTREX",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/VECTREX/icon.png"
+  },
+  {
+    "id": "VIC20",
+    "label": "VIC 20",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/VIC20/icon.png"
+  },
+  {
+    "id": "VIDEOPAC",
+    "label": "VIDEOPAC",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/VIDEOPAC/icon.png"
+  },
+  {
+    "id": "VIDEOS",
+    "label": "VIDEOS",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#DDEEFF",
+    "icon": "/Emus/VIDEOS/icon.png"
+  },
+  {
+    "id": "VIDEOTON",
+    "label": "VIDEOTON",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/VIDEOTON/icon.png"
+  },
+  {
+    "id": "VMAC",
+    "label": "VMAC",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/VMAC/icon.png"
+  },
+  {
+    "id": "WS",
+    "label": "WS",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/WS/icon.png"
+  },
+  {
+    "id": "WSC",
+    "label": "WonderSwan Color",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#A855F7",
+    "icon": "/Emus/WSC/icon.png"
+  },
+  {
+    "id": "X1",
+    "label": "SHARP x1",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/X1/icon.png"
+  },
+  {
+    "id": "X68000",
+    "label": "SHARP X68000",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/X68000/icon.png"
+  },
+  {
+    "id": "XRICK",
+    "label": "XRICK",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/XRICK/icon.png"
+  },
+  {
+    "id": "ZQUEST",
+    "label": "ZQUEST",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#FFFF88",
+    "icon": "/Emus/ZQUEST/icon.png"
+  },
+  {
+    "id": "ZXS",
+    "label": "ZXSPECTRUM",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/ZXS/icon.png"
+  },
+  {
+    "id": "_BootLogo",
+    "label": "_BootLogo",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/_BootLogo/icon.png"
+  },
+  {
+    "id": "_Scraper",
+    "label": "_Scraper",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/_Scraper/icon.png"
+  },
+  {
+    "id": "_SystemTools",
+    "label": "_System Tools",
+    "year": "RETRO",
+    "maker": "Universal",
+    "color": "#38BDF8",
+    "icon": "/Emus/_SystemTools/icon.png"
+  }
+]

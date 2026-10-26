@@ -1,0 +1,19 @@
+{
+  "label": "NES / Famicom",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "EF4444",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/FC",
+  "imgpath": "../../Imgs/FC",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "nes|fds|unf|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default (fceumm)",
+      "launch": "launch.sh"
+    }
+  ]
+}

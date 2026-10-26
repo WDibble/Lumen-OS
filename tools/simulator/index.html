@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumen Handheld Simulator - TrimUI Smart Pro (1280x720 Native)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #05070A;
+      color: #F8FAFC;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+    }
+    .header-bar {
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .header-bar h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #38BDF8;
+      text-transform: uppercase;
+    }
+    .header-bar p {
+      font-size: 12px;
+      color: #64748B;
+    }
+    /* Scaler Area */
+    .viewport-outer {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .device-scaler {
+      transform-origin: center center;
+      transition: transform 0.05s ease-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    /* Handheld Bezel Container (native size: 1376x784) */
+    .device-chassis {
+      width: 1376px;
+      height: 784px;
+      background: #10131A;
+      border: 4px solid #1E2433;
+      border-radius: 44px;
+      padding: 28px 44px;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.95), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* 1280x720 Native IPS Display */
+    .screen {
+      width: 1280px;
+      height: 720px;
+      background: #090D14;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.9);
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      transition: filter 0.15s ease;
+    }
+    .screen-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 10;
+    }
+    /* Top Status Bar (y: 0 to 48px) */
+    .status-bar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      background: rgba(14, 19, 29, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+    }
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-logo {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      color: #38BDF8;
+    }
+    .status-chip {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #38BDF8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+    .breadcrumb-tag {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94A3B8;
+      font-family: monospace;
+    }
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 14px;
+      font-family: monospace;
+      color: #94A3B8;
+    }
+    .status-right img {
+      height: 20px;
+      width: auto;
+    }
+
+    /* Views Container (height: 624px) */
+    .views-wrapper {
+      flex: 1;
+      height: 624px;
+      position: relative;
+      overflow: hidden;
+    }
+    .view-pane {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.98);
+      transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .view-pane.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* VIEW 1: CAROUSEL VIEW */
+    .nav-tabs {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .nav-tab {
+      padding: 6px 18px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #94A3B8;
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .nav-tab:active {
+      transform: scale(0.96);
+    }
+    .nav-tab.active {
+      color: #F8FAFC;
+      background: #171E2C;
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    }
+    .main-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .card-carousel {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      position: absolute;
+      left: 490px;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .system-card {
+      width: 300px;
+      height: 410px;
+      border-radius: 20px;
+      background: #111622;
+      border: 2px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 20px;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+      opacity: 0.5;
+      transform: scale(0.92);
+      will-change: transform;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+    }
+    .system-card:active {
+      transform: scale(0.89);
+    }
+    .system-card.focused {
+      width: 300px;
+      height: 410px;
+      background: #182030;
+      border-color: #38BDF8;
+      box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.8), 0 8px 16px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      opacity: 1;
+      transform: scale(1.0);
+    }
+    .system-card.focused:active {
+      transform: scale(0.97);
+    }
+    @media (hover: hover) {
+      .system-card:not(.focused):hover {
+        opacity: 0.8;
+        transform: scale(0.94);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      .nav-tab:hover {
+        color: #F8FAFC;
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+    .console-stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      position: relative;
+    }
+    .ambient-glow {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, transparent 70%);
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      opacity: 0.3;
+    }
+    .system-card.focused .ambient-glow {
+      opacity: 1;
+    }
+    .console-stage img {
+      position: relative;
+      z-index: 2;
+      max-width: 210px;
+      max-height: 210px;
+      object-fit: contain;
+      filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.65));
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .system-card.focused .console-stage img {
+      transform: scale(1.08) translateY(-4px);
+      filter: drop-shadow(0 20px 26px rgba(0, 0, 0, 0.85));
+    }
+    .card-info {
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 21px;
+      font-weight: 700;
+      color: #F8FAFC;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-family: monospace;
+      color: #94A3B8;
+    }
+    .card-chip {
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    /* VIEW 2 & 3: HANDHELD TWO-PANE LIST LAYOUT */
+    .handheld-layout {
+      width: 100%;
+      height: 100%;
+      display: flex;
+    }
+    .handheld-left-pane {
+      width: 440px;
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(14, 19, 29, 0.7);
+      backdrop-filter: blur(8px);
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .handheld-pedestal {
+      position: relative;
+      width: 260px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .handheld-pedestal-glow {
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .handheld-pedestal img {
+      max-width: 220px;
+      max-height: 200px;
+      object-fit: contain;
+      filter: drop-shadow(0 20px 28px rgba(0, 0, 0, 0.85));
+      position: relative;
+      z-index: 2;
+    }
+    .handheld-pane-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #F8FAFC;
+      letter-spacing: -0.01em;
+      margin-top: 14px;
+    }
+    .handheld-pane-sub {
+      font-size: 13px;
+      color: #94A3B8;
+      font-family: monospace;
+      margin-top: 4px;
+    }
+    .handheld-pane-badge {
+      margin-top: 8px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.12);
+      color: #38BDF8;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      font-size: 11px;
+      font-weight: 700;
+      font-family: monospace;
+    }
+
+    /* Right Scrollable List Pane */
+    .handheld-right-pane {
+      flex: 1;
+      padding: 24px 36px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scroll-behavior: smooth;
+    }
+    /* Native Handheld List Row (Matches list-item-2line-bg-f.png standard) */
+    .list-row {
+      height: 76px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 14px;
+      background: #111623;
+      border: 2px solid transparent;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .list-row.focused {
+      background: #182030;
+      border-color: #38BDF8;
+      box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transform: translateX(8px);
+    }
+    .list-row-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .list-row-idx {
+      font-family: monospace;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      color: #64748B;
+      min-width: 24px;
+    }
+    .list-row.focused .list-row-idx {
+      color: #38BDF8;
+      font-weight: 700;
+    }
+    .list-row-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .list-row-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #F8FAFC;
+    }
+    .list-row-desc {
+      font-size: 12px;
+      color: #94A3B8;
+      font-family: monospace;
+    }
+    .list-row-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .list-row-badge {
+      padding: 4px 12px;
+      border-radius: 6px;
+      background: #0284C7;
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border: 1px solid #38BDF8;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      font-family: monospace;
+    }
+    .list-row.focused .list-row-badge {
+      opacity: 1;
+    }
+
+    /* Handheld Stepper Control (for Settings rows) */
+    .dpad-stepper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #F8FAFC;
+    }
+    .stepper-arrow {
+      color: #64748B;
+      font-size: 16px;
+      transition: color 0.15s ease;
+    }
+    .list-row.focused .stepper-arrow {
+      color: #38BDF8;
+    }
+    .stepper-pill {
+      background: #1E283D;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4px 14px;
+      border-radius: 8px;
+      min-width: 140px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      color: #F8FAFC;
+    }
+    .list-row.focused .stepper-pill {
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #38BDF8;
+    }
+
+    /* Full-Screen Native Launch Screen */
+    .launch-screen {
+      position: absolute;
+      inset: 0;
+      background: #05070A;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .launch-screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .launch-logo {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      color: #38BDF8;
+    }
+    .launch-terminal {
+      width: 720px;
+      background: #0E131E;
+      border: 1px solid #1E283D;
+      border-radius: 14px;
+      padding: 20px 24px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #94A3B8;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    }
+    .launch-terminal .term-accent {
+      color: #34D399;
+    }
+    .launch-terminal .term-blue {
+      color: #38BDF8;
+    }
+
+    /* Bottom Hint Bar (y: 672 to 720px) */
+    .bottom-bar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(14, 19, 29, 0.85);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+    }
+    .hints {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .hint-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94A3B8;
+    }
+    .hint-item img {
+      width: 24px;
+      height: 24px;
+      display: block;
+      object-fit: contain;
+    }
+    .hint-item span {
+      line-height: 1;
+      display: inline-block;
+    }
+    /* Controls Footer */
+    .controls-info {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #64748B;
+      flex-shrink: 0;
+    }
+    .key-badge {
+      background: #1E293B;
+      color: #F8FAFC;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 11px;
+      border: 1px solid #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <h1>Lumen Handheld Simulator</h1>
+    <p>1280×720 Native 16:9 IPS • Authentic TrimUI Smart Pro Architecture</p>
+  </div>
+
+  <div class="viewport-outer" id="viewport-outer">
+    <div class="device-scaler" id="device-scaler">
+      <div class="device-chassis">
+        <div class="screen" id="screen">
+          <div class="screen-content">
+            <!-- Top Status Bar -->
+            <div class="status-bar">
+              <div class="status-left">
+                <span class="status-logo">L U M E N</span>
+                <span class="status-chip" id="status-chip">TRIMUI PRO</span>
+                <span class="breadcrumb-tag" id="breadcrumb" style="display: none;">› CONSOLES</span>
+              </div>
+              <div class="status-right">
+                <img src="/Themes/Lumen/skin/ic-wifi-05.png" alt="WiFi">
+                <img src="/Themes/Lumen/skin/ic-batery-100%.png" alt="Battery">
+                <span id="clock" style="font-variant-numeric: tabular-nums;">12:00</span>
+              </div>
+            </div>
+
+            <!-- Views Wrapper -->
+            <div class="views-wrapper">
+              <!-- VIEW 1: TOP-LEVEL CAROUSEL (CONSOLES, APPS, FAVORITES, SETTINGS) -->
+              <div class="view-pane active" id="view-carousel">
+                <div class="nav-tabs">
+                  <div class="nav-tab active">CONSOLES</div>
+                  <div class="nav-tab">APPS</div>
+                  <div class="nav-tab">FAVORITES</div>
+                  <div class="nav-tab">SETTINGS</div>
+                </div>
+                <div class="main-viewport">
+                  <div class="card-carousel" id="carousel"></div>
+                </div>
+              </div>
+
+              <!-- VIEW 2: HANDHELD GAME LIST VIEW -->
+              <div class="view-pane" id="view-games">
+                <div class="handheld-layout">
+                  <div class="handheld-left-pane">
+                    <div class="handheld-pedestal">
+                      <div class="handheld-pedestal-glow" id="game-glow"></div>
+                      <img id="game-console-img" src="/Emus/GBA/icon.png" alt="Console">
+                    </div>
+                    <div class="handheld-pane-title" id="game-pane-title">Game Boy Advance</div>
+                    <div class="handheld-pane-sub" id="game-pane-sub">Nintendo • 2001</div>
+                    <div class="handheld-pane-badge" id="game-pane-badge">6 TITLES INSTALLED</div>
+                  </div>
+                  <div class="handheld-right-pane" id="game-list-rows"></div>
+                </div>
+              </div>
+
+              <!-- VIEW 3: HANDHELD SETTINGS LIST VIEW -->
+              <div class="view-pane" id="view-settings">
+                <div class="handheld-layout">
+                  <div class="handheld-left-pane">
+                    <div class="handheld-pedestal">
+                      <div class="handheld-pedestal-glow" id="setting-glow" style="background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);"></div>
+                      <img id="setting-hero-img" src="/Themes/Lumen/skin/btn-bg-f.png" alt="Settings" style="max-height: 120px;">
+                    </div>
+                    <div class="handheld-pane-title">System Settings</div>
+                    <div class="handheld-pane-sub">TrimUI Pro Hardware Config</div>
+                    <div class="handheld-pane-badge">D-PAD STEPPERS ACTIVE</div>
+                  </div>
+                  <div class="handheld-right-pane" id="settings-list-rows"></div>
+                </div>
+              </div>
+
+              <!-- VIEW 4: SIMULATED GAME LAUNCH SCREEN -->
+              <div class="launch-screen" id="launch-screen">
+                <div class="launch-logo">L U M E N</div>
+                <div class="launch-terminal" id="launch-terminal">
+                  <div>[System/scripts/launch.sh] Initializing hardware dispatcher...</div>
+                  <div>[next-hw] Setting CPU governor to <span class="term-accent">performance (1608 MHz)</span></div>
+                  <div>[next-hw] Activating analog RGB LED ring sync (<span class="term-blue">Cyan Pulse</span>)</div>
+                  <div id="launch-rom-line">[Kernel] Spawning emulator runtime: <span class="term-accent">/mnt/SDCARD/Roms/GBA/Zelda.gba</span></div>
+                  <div style="margin-top: 12px; color: #F8FAFC;">🎮 GAME RUNNING • Press <span class="term-blue">[B]</span> or <span class="term-blue">[Esc]</span> to return to Lumen OS</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Hint Bar -->
+            <div class="bottom-bar">
+              <div class="hints" id="bottom-hints"></div>
+              <div style="font-size: 13px; font-family: monospace; color: #94A3B8;">
+                <span id="system-count" style="font-variant-numeric: tabular-nums; display: inline-block; min-width: 64px; text-align: right;">0 / 0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-info">
+    <span>Tabs: <span class="key-badge">Q</span> <span class="key-badge">E</span></span>
+    <span>Navigate: <span class="key-badge">↑</span> <span class="key-badge">↓</span> <span class="key-badge">←</span> <span class="key-badge">→</span></span>
+    <span>Confirm / (A): <span class="key-badge">Enter</span></span>
+    <span>Back / (B): <span class="key-badge">Esc</span></span>
+    <span>Acoustics: <span class="key-badge">24ms click.wav</span></span>
+  </div>
+
+  <audio id="click-audio" src="/Themes/Lumen/sound/click.wav" preload="auto"></audio>
+
+  <script>
+    // State Machine
+    // activeView: "carousel" | "games" | "settings" | "launch"
+    let activeView = "carousel";
+    let currentTab = 0;       // 0: CONSOLES, 1: APPS, 2: FAVORITES, 3: SETTINGS
+    let carouselIndex = 0;
+    let listRowIndex = 0;
+
+    // Top-Level Systems (CONSOLES)
+    let systems = [
+      { id: "GBA", label: "Game Boy Advance", year: "2001", maker: "Nintendo", color: "#38BDF8" },
+      { id: "SFC", label: "Super Famicom / SNES", year: "1990", maker: "Nintendo", color: "#818CF8" },
+      { id: "PS", label: "Sony PlayStation", year: "1994", maker: "Sony", color: "#60A5FA" },
+      { id: "PSP", label: "PlayStation Portable", year: "2004", maker: "Sony", color: "#38BDF8" },
+      { id: "N64", label: "Nintendo 64", year: "1996", maker: "Nintendo", color: "#10B981" },
+      { id: "NDS", label: "Nintendo DS", year: "2004", maker: "Nintendo", color: "#F59E0B" },
+      { id: "DC", label: "Sega Dreamcast", year: "1998", maker: "Sega", color: "#FB923C" },
+      { id: "MD", label: "Sega Mega Drive", year: "1988", maker: "Sega", color: "#0284C7" },
+      { id: "PCE", label: "PC Engine", year: "1987", maker: "NEC", color: "#EC4899" },
+      { id: "NEOGEO", label: "SNK Neo Geo", year: "1990", maker: "SNK", color: "#EAB308" },
+      { id: "FC", label: "NES / Famicom", year: "1983", maker: "Nintendo", color: "#EF4444" },
+      { id: "GB", label: "Game Boy", year: "1989", maker: "Nintendo", color: "#A3E635" },
+      { id: "GBC", label: "Game Boy Color", year: "1998", maker: "Nintendo", color: "#F43F5E" },
+      { id: "FBNEO", label: "FinalBurn Arcade", year: "ARCADE", maker: "Capcom / SNK", color: "#14B8A6" }
+    ];
+
+    // APPS
+    const apps = [
+      { id: "BIOSDoctor", label: "BIOS Doctor", year: "DIAG", maker: "Firmware Auditor", color: "#38BDF8", icon: "/Apps/SystemChecker/icon.png" },
+      { id: "Search", label: "ROM Search", year: "SEARCH", maker: "Lumen Utility", color: "#60A5FA", icon: "/Apps/Search/icon.png" },
+      { id: "SystemTools", label: "System Tools", year: "CONFIG", maker: "MainUI Settings", color: "#34D399", icon: "/Apps/SystemTools/icon.png" },
+      { id: "PortMaster", label: "PortMaster", year: "PORTS", maker: "PortMaster Team", color: "#38BDF8", icon: "/Apps/PortMaster/icon.png" },
+      { id: "RetroArch", label: "RetroArch", year: "EMU", maker: "Libretro Team", color: "#818CF8", icon: "/Apps/RetroArch/icon.png" },
+      { id: "FileManager", label: "File Manager", year: "TOOL", maker: "Dingux / Posix", color: "#F59E0B", icon: "/Apps/FileManager/icon.png" },
+      { id: "Terminal", label: "Terminal Shell", year: "CLI", maker: "BusyBox / SSH", color: "#10B981", icon: "/Apps/Terminal/icon.png" },
+      { id: "MusicPlayer", label: "Music & Audio", year: "MEDIA", maker: "GMU Player", color: "#EC4899", icon: "/Apps/MusicPlayer/icon.png" },
+      { id: "USBStorage", label: "USB Storage", year: "STORAGE", maker: "ConfigFS Gadget", color: "#F59E0B", icon: "/Apps/USBStorage/icon.png" }
+    ];
+
+    // FAVORITES
+    const favorites = [
+      { id: "GBA", label: "The Legend of Zelda", year: "2004", maker: "Game Boy Advance", color: "#10B981", sub: "The Minish Cap" },
+      { id: "PS", label: "Castlevania: SotN", year: "1997", maker: "Sony PlayStation", color: "#60A5FA", sub: "Symphony of the Night" },
+      { id: "SFC", label: "Super Mario World", year: "1990", maker: "Super Famicom", color: "#EF4444", sub: "Super Mario World" },
+      { id: "SFC", label: "Chrono Trigger", year: "1995", maker: "Super Famicom", color: "#818CF8", sub: "Square" },
+      { id: "GBA", label: "Metroid Fusion", year: "2002", maker: "Game Boy Advance", color: "#38BDF8", sub: "Metroid 4" },
+      { id: "GBA", label: "Pokemon Emerald", year: "2005", maker: "Game Boy Advance", color: "#34D399", sub: "Game Freak" }
+    ];
+
+    // Handheld Console ROM Library Data
+    const consoleGames = {
+      GBA: [
+        { title: "The Legend of Zelda: The Minish Cap", year: "2004", genre: "Action Adventure", rom: "Zelda_MinishCap.gba" },
+        { title: "Metroid Fusion", year: "2002", genre: "Metroidvania", rom: "Metroid_Fusion.gba" },
+        { title: "Pokemon Emerald Version", year: "2005", genre: "Role-Playing", rom: "Pokemon_Emerald.gba" },
+        { title: "Castlevania: Aria of Sorrow", year: "2003", genre: "Action RPG", rom: "Castlevania_Aria.gba" },
+        { title: "Golden Sun", year: "2001", genre: "Turn-Based RPG", rom: "Golden_Sun.gba" },
+        { title: "Advance Wars 2: Black Hole Rising", year: "2003", genre: "Tactical Strategy", rom: "Advance_Wars_2.gba" }
+      ],
+      SFC: [
+        { title: "Super Mario World", year: "1990", genre: "Platformer", rom: "Super_Mario_World.sfc" },
+        { title: "Chrono Trigger", year: "1995", genre: "JRPG", rom: "Chrono_Trigger.sfc" },
+        { title: "Super Metroid", year: "1994", genre: "Action Adventure", rom: "Super_Metroid.sfc" },
+        { title: "The Legend of Zelda: A Link to the Past", year: "1991", genre: "Adventure", rom: "Zelda_ALttP.sfc" },
+        { title: "Donkey Kong Country 2", year: "1995", genre: "Platformer", rom: "DKC2.sfc" }
+      ],
+      PS: [
+        { title: "Castlevania: Symphony of the Night", year: "1997", genre: "Action RPG", rom: "Castlevania_SotN.chd" },
+        { title: "Metal Gear Solid", year: "1998", genre: "Tactical Espionage", rom: "MGS.chd" },
+        { title: "Final Fantasy VII", year: "1997", genre: "RPG", rom: "FF7.chd" },
+        { title: "Crash Bandicoot: Warped", year: "1998", genre: "3D Platformer", rom: "Crash3.chd" },
+        { title: "Tekken 3", year: "1998", genre: "Fighting", rom: "Tekken3.chd" }
+      ],
+      PSP: [
+        { title: "Crisis Core: Final Fantasy VII", year: "2007", genre: "Action RPG", rom: "Crisis_Core.iso" },
+        { title: "God of War: Ghost of Sparta", year: "2010", genre: "Action", rom: "GoW_GhostOfSparta.iso" },
+        { title: "Monster Hunter Freedom Unite", year: "2008", genre: "Action Hunting", rom: "MHFU.iso" },
+        { title: "Persona 3 Portable", year: "2009", genre: "JRPG", rom: "P3P.iso" }
+      ],
+      N64: [
+        { title: "Super Mario 64", year: "1996", genre: "3D Platformer", rom: "SM64.z64" },
+        { title: "The Legend of Zelda: Ocarina of Time", year: "1998", genre: "Action Adventure", rom: "Zelda_OoT.z64" },
+        { title: "GoldenEye 007", year: "1997", genre: "First-Person Shooter", rom: "GoldenEye.z64" },
+        { title: "Banjo-Kazooie", year: "1998", genre: "3D Platformer", rom: "Banjo.z64" }
+      ]
+    };
+
+    // Handheld D-Pad Stepper Settings Data
+    const settingsItems = [
+      {
+        id: "THEME_ACCENT",
+        name: "Lumen Accent Palette",
+        desc: "Interactive highlight & badge color",
+        options: ["Cyan (Lumen)", "Cyberpunk Violet", "Emerald Pulse", "Solar Amber"],
+        values: ["#38BDF8", "#A855F7", "#10B981", "#F59E0B"],
+        selected: 0
+      },
+      {
+        id: "BRIGHTNESS",
+        name: "IPS Backlight PWM",
+        desc: "Allwinner dispdbg display luminance",
+        options: ["50%", "60%", "70%", "80%", "90%", "100%"],
+        values: [50, 60, 70, 80, 90, 100],
+        selected: 3
+      },
+      {
+        id: "LED_MODE",
+        name: "RGB Analog LED Rings",
+        desc: "sysfs led_anim stick illumination mode",
+        options: ["Breathing", "Solid Ring", "Pulse", "Rainbow Cycle", "Off"],
+        values: ["breathe", "solid", "pulse", "rainbow", "off"],
+        selected: 0
+      },
+      {
+        id: "CPU_GOV",
+        name: "CPU Scaling Governor",
+        desc: "cpufreq dynamic clock stepping policy",
+        options: ["Ondemand (816-1608MHz)", "Performance (1608MHz)", "Powersave (408MHz)"],
+        values: ["ondemand", "performance", "powersave"],
+        selected: 0
+      },
+      {
+        id: "REFRESH",
+        name: "Display Refresh Timing",
+        desc: "1280x720 IPS panel controller sync",
+        options: ["60Hz Native IPS", "50Hz PAL Mode"],
+        values: [60, 50],
+        selected: 0
+      },
+      {
+        id: "NAND_PROTECT",
+        name: "NAND Flash Sentinel",
+        desc: "Bind-mount /mnt/SDCARD/System/userdata",
+        options: ["Active (Zero Wear)", "Direct Mount"],
+        values: [1, 0],
+        selected: 0
+      },
+      {
+        id: "SSH_DAEMON",
+        name: "Dropbear SSH Server",
+        desc: "Port 22 root access on wlan0 (192.168.1.142)",
+        options: ["Enabled (Port 22)", "Disabled"],
+        values: [1, 0],
+        selected: 0
+      },
+      {
+        id: "FN_MODE",
+        name: "Hardware FN Switch Action",
+        desc: "Physical slider switch behavior on /dev/input/event3",
+        options: ["Turbo Performance (1.6GHz)", "Mute Audio", "LED Off"],
+        values: ["turbo", "mute", "led_off"],
+        selected: 0
+      },
+      {
+        id: "SYNCTHING",
+        name: "Syncthing Cloud Saves",
+        desc: "Headless background Wi-Fi sync for saves & states",
+        options: ["Disabled (Save Battery)", "Enabled (Port 8384)"],
+        values: [0, 1],
+        selected: 0
+      }
+    ];
+
+    // DOM Elements
+    const screen = document.getElementById("screen");
+    const scaler = document.getElementById("device-scaler");
+    const viewportOuter = document.getElementById("viewport-outer");
+    const carousel = document.getElementById("carousel");
+    const navTabs = document.querySelectorAll(".nav-tab");
+    const bottomHints = document.getElementById("bottom-hints");
+    const systemCount = document.getElementById("system-count");
+    const breadcrumb = document.getElementById("breadcrumb");
+    const clickSound = document.getElementById("click-audio");
+
+    const viewCarousel = document.getElementById("view-carousel");
+    const viewGames = document.getElementById("view-games");
+    const viewSettings = document.getElementById("view-settings");
+    const launchScreen = document.getElementById("launch-screen");
+
+    // Load Wallpaper
+    screen.style.backgroundImage = "url('/Themes/Lumen/skin/bg.png')";
+
+    // Responsive Handheld Frame Scaling
+    function updateResponsiveScale() {
+      const availW = viewportOuter.clientWidth;
+      const availH = viewportOuter.clientHeight;
+      const nativeW = 1376;
+      const nativeH = 784;
+
+      const scaleX = (availW - 16) / nativeW;
+      const scaleY = (availH - 16) / nativeH;
+      const scale = Math.min(scaleX, scaleY);
+
+      scaler.style.transform = `scale(${Math.max(0.2, scale)})`;
+    }
+    window.addEventListener("resize", updateResponsiveScale);
+    window.addEventListener("DOMContentLoaded", updateResponsiveScale);
+
+    function playClick() {
+      try {
+        clickSound.currentTime = 0;
+        clickSound.play().catch(() => {});
+      } catch (e) {}
+    }
+
+    function getActiveCarouselItems() {
+      if (currentTab === 0) return systems;
+      if (currentTab === 1) return apps;
+      if (currentTab === 2) return favorites;
+      return systems;
+    }
+
+    // Navigation Switcher
+    function switchView(targetView) {
+      activeView = targetView;
+      viewCarousel.classList.remove("active");
+      viewGames.classList.remove("active");
+      viewSettings.classList.remove("active");
+      launchScreen.classList.remove("active");
+
+      if (targetView === "carousel") {
+        viewCarousel.classList.add("active");
+        breadcrumb.style.display = "none";
+        renderCarousel();
+      } else if (targetView === "games") {
+        viewGames.classList.add("active");
+        breadcrumb.style.display = "inline";
+        const currentSystem = systems[carouselIndex];
+        breadcrumb.textContent = `› ${currentSystem.label.toUpperCase()}`;
+        listRowIndex = 0;
+        renderGameList();
+      } else if (targetView === "settings") {
+        viewSettings.classList.add("active");
+        breadcrumb.style.display = "inline";
+        breadcrumb.textContent = `› SETTINGS`;
+        listRowIndex = 0;
+        renderSettingsList();
+      } else if (targetView === "launch") {
+        launchScreen.classList.add("active");
+      }
+      updateHints();
+    }
+
+    // Top-Level Carousel Render
+    function renderCarousel() {
+      const items = getActiveCarouselItems();
+      carousel.innerHTML = "";
+
+      items.forEach((item, i) => {
+        const isFocused = i === carouselIndex;
+        const card = document.createElement("div");
+        card.className = "system-card" + (isFocused ? " focused" : "");
+        if (isFocused) {
+          card.style.borderColor = item.color;
+          card.style.boxShadow = `0 20px 48px -12px rgba(0, 0, 0, 0.8), 0 8px 16px -8px ${item.color}33, inset 0 1px 0 rgba(255, 255, 255, 0.12)`;
+        }
+
+        const iconSrc = item.icon || (currentTab === 0 ? `/Emus/${item.id}/icon.png` : (currentTab === 2 ? `/Emus/${item.id}/icon.png` : `/Themes/Lumen/skin/grid2-item-bg-f.png`));
+        const subLabel = item.sub || item.maker;
+
+        card.innerHTML = `
+          <div class="console-stage">
+            <div class="ambient-glow" style="background: radial-gradient(circle, ${item.color}44 0%, transparent 70%);"></div>
+            <img src="${iconSrc}" onerror="this.src='/Themes/Lumen/skin/grid2-item-bg-f.png'">
+          </div>
+          <div class="card-info">
+            <div class="card-title">${item.label}</div>
+            <div class="card-meta">
+              <span>${subLabel}</span>
+              <span>•</span>
+              <span class="card-chip" style="background: ${item.color}22; color: ${item.color}; border: 1px solid ${item.color}44;">${item.year}</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          if (carouselIndex !== i) {
+            carouselIndex = i;
+            playClick();
+            renderCarousel();
+          } else {
+            activateCarouselItem();
+          }
+        });
+        carousel.appendChild(card);
+      });
+
+      const cardPitch = 332;
+      const offset = -(carouselIndex * cardPitch);
+      carousel.style.transform = `translateX(${offset}px)`;
+      systemCount.textContent = `${carouselIndex + 1} / ${items.length}`;
+    }
+
+    function setTab(idx) {
+      if (idx < 0) idx = 3;
+      if (idx > 3) idx = 0;
+      currentTab = idx;
+      carouselIndex = 0;
+
+      navTabs.forEach((tab, i) => {
+        if (i === currentTab) tab.classList.add("active");
+        else tab.classList.remove("active");
+      });
+
+      playClick();
+
+      if (currentTab === 3) {
+        // Direct transition into Handheld Settings List View
+        switchView("settings");
+      } else {
+        switchView("carousel");
+      }
+    }
+
+    navTabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => setTab(i));
+    });
+
+    // Handheld Game List View Render
+    function getActiveGames() {
+      const sysId = systems[carouselIndex].id;
+      return consoleGames[sysId] || [
+        { title: `${systems[carouselIndex].label} Adventure Quest`, year: systems[carouselIndex].year, genre: "Action RPG", rom: "game1.bin" },
+        { title: `${systems[carouselIndex].label} Championship GP`, year: systems[carouselIndex].year, genre: "Racing", rom: "game2.bin" },
+        { title: `${systems[carouselIndex].label} Super All-Stars`, year: systems[carouselIndex].year, genre: "Platformer", rom: "game3.bin" }
+      ];
+    }
+
+    function renderGameList() {
+      const curSys = systems[carouselIndex];
+      const games = getActiveGames();
+
+      document.getElementById("game-pane-title").textContent = curSys.label;
+      document.getElementById("game-pane-sub").textContent = `${curSys.maker} • ${curSys.year}`;
+      document.getElementById("game-pane-badge").textContent = `${games.length} TITLES INSTALLED`;
+      document.getElementById("game-console-img").src = `/Emus/${curSys.id}/icon.png`;
+      document.getElementById("game-glow").style.background = `radial-gradient(circle, ${curSys.color}40 0%, transparent 70%)`;
+
+      const container = document.getElementById("game-list-rows");
+      container.innerHTML = "";
+
+      games.forEach((game, idx) => {
+        const isFocused = idx === listRowIndex;
+        const row = document.createElement("div");
+        row.className = "list-row" + (isFocused ? " focused" : "");
+        if (isFocused) {
+          row.style.borderColor = curSys.color;
+        }
+
+        row.innerHTML = `
+          <div class="list-row-left">
+            <span class="list-row-idx">${idx + 1}</span>
+            <div class="list-row-text">
+              <span class="list-row-title">${game.title}</span>
+              <span class="list-row-desc">${game.genre} • ${game.year} • ${game.rom}</span>
+            </div>
+          </div>
+          <div class="list-row-action">
+            <span class="list-row-badge" style="background: ${curSys.color}; border-color: ${curSys.color};">PRESS (A) TO LAUNCH</span>
+          </div>
+        `;
+
+        row.addEventListener("click", () => {
+          listRowIndex = idx;
+          playClick();
+          renderGameList();
+          launchGame(game);
+        });
+
+        container.appendChild(row);
+      });
+
+      // Keep focused row visible in scroll viewport
+      const focusedEl = container.querySelector(".list-row.focused");
+      if (focusedEl) {
+        focusedEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+
+      systemCount.textContent = `${listRowIndex + 1} / ${games.length}`;
+    }
+
+    // Handheld Settings List View Render
+    function renderSettingsList() {
+      const container = document.getElementById("settings-list-rows");
+      container.innerHTML = "";
+
+      settingsItems.forEach((setting, idx) => {
+        const isFocused = idx === listRowIndex;
+        const row = document.createElement("div");
+        row.className = "list-row" + (isFocused ? " focused" : "");
+
+        const curValStr = setting.options[setting.selected];
+
+        row.innerHTML = `
+          <div class="list-row-left">
+            <span class="list-row-idx">${idx + 1}</span>
+            <div class="list-row-text">
+              <span class="list-row-title">${setting.name}</span>
+              <span class="list-row-desc">${setting.desc}</span>
+            </div>
+          </div>
+          <div class="dpad-stepper">
+            <span class="stepper-arrow">◄</span>
+            <span class="stepper-pill">${curValStr}</span>
+            <span class="stepper-arrow">►</span>
+          </div>
+        `;
+
+        row.addEventListener("click", () => {
+          listRowIndex = idx;
+          playClick();
+          renderSettingsList();
+        });
+
+        container.appendChild(row);
+      });
+
+      const focusedEl = container.querySelector(".list-row.focused");
+      if (focusedEl) {
+        focusedEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+
+      systemCount.textContent = `${listRowIndex + 1} / ${settingsItems.length}`;
+    }
+
+    // Adjust Stepper Value with D-Pad Left / Right
+    function stepSetting(delta) {
+      const setting = settingsItems[listRowIndex];
+      const count = setting.options.length;
+      setting.selected = (setting.selected + delta + count) % count;
+      playClick();
+
+      // Apply side-effects immediately
+      if (setting.id === "THEME_ACCENT") {
+        const color = setting.values[setting.selected];
+        document.querySelectorAll(".status-logo, .status-chip").forEach(el => el.style.color = color);
+        document.querySelectorAll(".nav-tab.active").forEach(el => el.style.borderColor = `${color}66`);
+      } else if (setting.id === "BRIGHTNESS") {
+        const val = setting.values[setting.selected];
+        screen.style.filter = `brightness(${val / 100})`;
+      }
+
+      renderSettingsList();
+    }
+
+    // Launch Game Simulation
+    function launchGame(game) {
+      playClick();
+      document.getElementById("launch-rom-line").innerHTML = `[Kernel] Spawning emulator runtime: <span class="term-accent">/mnt/SDCARD/Roms/${systems[carouselIndex].id}/${game.rom}</span>`;
+      switchView("launch");
+    }
+
+    function activateCarouselItem() {
+      playClick();
+      if (currentTab === 0) {
+        // Enter Game List View
+        switchView("games");
+      } else if (currentTab === 1) {
+        // App launch
+        const app = apps[carouselIndex];
+        document.getElementById("launch-rom-line").innerHTML = `[Kernel] Spawning app runtime: <span class="term-accent">/mnt/SDCARD/Apps/${app.id}/launch.sh</span>`;
+        switchView("launch");
+      } else if (currentTab === 2) {
+        // Favorite launch
+        const fav = favorites[carouselIndex];
+        document.getElementById("launch-rom-line").innerHTML = `[Kernel] Resuming favorite save state: <span class="term-accent">${fav.label} (${fav.sub})</span>`;
+        switchView("launch");
+      }
+    }
+
+    // Contextual Bottom Hints
+    function updateHints() {
+      if (activeView === "carousel") {
+        bottomHints.innerHTML = `
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-A.png"><span>OPEN</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-B.png"><span>BACK</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-L.png"><span>TABS [Q/E]</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-MENU.png"><span>SYSTEM</span></div>
+        `;
+      } else if (activeView === "games") {
+        bottomHints.innerHTML = `
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-A.png"><span>LAUNCH</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-B.png"><span>CONSOLES</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-X.png"><span>FAVORITE</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-MENU.png"><span>MENU</span></div>
+        `;
+      } else if (activeView === "settings") {
+        bottomHints.innerHTML = `
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-A.png"><span>SELECT</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-L.png"><span>[◄►] ADJUST</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-B.png"><span>BACK</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-X.png"><span>DEFAULT</span></div>
+        `;
+      } else if (activeView === "launch") {
+        bottomHints.innerHTML = `
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-B.png"><span>EXIT GAME</span></div>
+          <div class="hint-item"><img src="/Themes/Lumen/skin/tips-MENU.png"><span>RETROARCH MENU</span></div>
+        `;
+      }
+    }
+
+    // Handheld D-Pad Keyboard Controller
+    window.addEventListener("keydown", (e) => {
+      if (activeView === "launch") {
+        if (e.key === "Escape" || e.key === "b" || e.key === "B" || e.key === "Enter") {
+          playClick();
+          switchView(currentTab === 0 ? "games" : "carousel");
+        }
+        return;
+      }
+
+      if (activeView === "games") {
+        const games = getActiveGames();
+        if (e.key === "ArrowDown") {
+          if (listRowIndex < games.length - 1) {
+            listRowIndex++;
+            playClick();
+            renderGameList();
+          }
+        } else if (e.key === "ArrowUp") {
+          if (listRowIndex > 0) {
+            listRowIndex--;
+            playClick();
+            renderGameList();
+          }
+        } else if (e.key === "Enter" || e.key === "a" || e.key === "A") {
+          launchGame(games[listRowIndex]);
+        } else if (e.key === "Escape" || e.key === "b" || e.key === "B" || e.key === "Backspace") {
+          playClick();
+          switchView("carousel");
+        }
+        return;
+      }
+
+      if (activeView === "settings") {
+        if (e.key === "ArrowDown") {
+          if (listRowIndex < settingsItems.length - 1) {
+            listRowIndex++;
+            playClick();
+            renderSettingsList();
+          }
+        } else if (e.key === "ArrowUp") {
+          if (listRowIndex > 0) {
+            listRowIndex--;
+            playClick();
+            renderSettingsList();
+          }
+        } else if (e.key === "ArrowLeft") {
+          stepSetting(-1);
+        } else if (e.key === "ArrowRight") {
+          stepSetting(1);
+        } else if (e.key === "Escape" || e.key === "b" || e.key === "B" || e.key === "Backspace") {
+          playClick();
+          setTab(0); // Return to Consoles tab
+        } else if (e.key === "q" || e.key === "Q" || e.key === "PageUp" || e.key === "[") {
+          setTab(2);
+        } else if (e.key === "e" || e.key === "E" || e.key === "PageDown" || e.key === "]") {
+          setTab(0);
+        }
+        return;
+      }
+
+      if (activeView === "carousel") {
+        const items = getActiveCarouselItems();
+        if (e.key === "ArrowRight") {
+          if (carouselIndex < items.length - 1) {
+            carouselIndex++;
+            playClick();
+            renderCarousel();
+          }
+        } else if (e.key === "ArrowLeft") {
+          if (carouselIndex > 0) {
+            carouselIndex--;
+            playClick();
+            renderCarousel();
+          }
+        } else if (e.key === "q" || e.key === "Q" || e.key === "PageUp" || e.key === "[") {
+          setTab(currentTab - 1);
+        } else if (e.key === "e" || e.key === "E" || e.key === "PageDown" || e.key === "]") {
+          setTab(currentTab + 1);
+        } else if (e.key === "1") {
+          setTab(0);
+        } else if (e.key === "2") {
+          setTab(1);
+        } else if (e.key === "3") {
+          setTab(2);
+        } else if (e.key === "4") {
+          setTab(3);
+        } else if (e.key === "Tab") {
+          e.preventDefault();
+          setTab(e.shiftKey ? currentTab - 1 : currentTab + 1);
+        } else if (e.key === "Enter" || e.key === "a" || e.key === "A") {
+          activateCarouselItem();
+        }
+      }
+    });
+
+    // Real-Time Clock
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      document.getElementById("clock").textContent = `${h}:${m}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Query Parameter Support
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get("view");
+    const tabParam = urlParams.get("tab");
+    if (viewParam === "games") {
+      switchView("games");
+    } else if (tabParam) {
+      if (tabParam === "apps" || tabParam === "1") setTab(1);
+      else if (tabParam === "favorites" || tabParam === "2") setTab(2);
+      else if (tabParam === "settings" || tabParam === "3") setTab(3);
+      else setTab(0);
+    } else {
+      renderCarousel();
+      updateHints();
+    }
+
+    // Dynamic catalog loader for full 112 console parity
+    fetch("/tools/simulator/emus_catalog.json")
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          systems = data;
+          if (activeView === "carousel" && currentTab === 0) {
+            renderCarousel();
+          }
+        }
+      })
+      .catch(() => {});
+    setTimeout(updateResponsiveScale, 50);
+  </script>
+</body>
+</html>

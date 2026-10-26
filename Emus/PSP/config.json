@@ -1,0 +1,23 @@
+{
+  "label": "Sony PlayStation Portable",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "38BDF8",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/PSP",
+  "imgpath": "../../Imgs/PSP",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "iso|cso|pbp|chd",
+  "launchlist": [
+    {
+      "name": "PPSSPP 1.17.1 (OpenGL ES - Stable)",
+      "launch": "launch.sh gl"
+    },
+    {
+      "name": "PPSSPP 1.17.1 (Vulkan - Experimental)",
+      "launch": "launch.sh vulkan"
+    }
+  ]
+}

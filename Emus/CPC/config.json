@@ -1,0 +1,19 @@
+{
+  "label": "AMSTRAD CPC",
+  "icon": "icon.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/CPC.png",
+  "iconsel": "",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/CPC",
+  "imgpath": "../../Imgs/CPC",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

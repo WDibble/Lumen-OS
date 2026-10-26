@@ -1,0 +1,18 @@
+{
+  "label": "_System Tools",
+  "icon": "icon.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/_SystemTools",
+  "imgpath": "../../Imgs/_SystemTools",
+  "useswap": 0,
+  "shortname": 1,
+  "hidebios": 1,
+  "extlist": "sh",
+  "background": "/mnt/SDCARD/Backgrounds/Default/_SystemTools.png",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

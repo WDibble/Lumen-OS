@@ -1,0 +1,19 @@
+{
+  "label": "SNES / Super Famicom",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "818CF8",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/SFC",
+  "imgpath": "../../Imgs/SFC",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "sfc|smc|fig|bs|st|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default (snes9x)",
+      "launch": "launch.sh"
+    }
+  ]
+}

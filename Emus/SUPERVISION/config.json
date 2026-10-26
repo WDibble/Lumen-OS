@@ -1,0 +1,21 @@
+{
+  "label": "SUPERVISION",
+  "icon": "icon.png",
+  "iconsmall": "",
+  "iconlist": "",
+  "background": "/mnt/SDCARD/Backgrounds/Default/SUPERVISION.png",
+  "themecolor": "FF0000",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/SUPERVISION",
+  "imgpath": "../../Imgs/SUPERVISION",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "sv|bin|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

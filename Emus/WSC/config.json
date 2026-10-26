@@ -1,0 +1,19 @@
+{
+  "label": "WonderSwan Color",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "A855F7",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/WSC",
+  "imgpath": "../../Imgs/WSC",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "ws|wsc|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default (mednafen_wswan)",
+      "launch": "launch.sh"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "label": "PSPMINIS",
+  "icon": "icon.png",
+  "launch": "launch.sh",
+  "background": "/mnt/SDCARD/Backgrounds/Default/PSPMINIS.png",
+  "themecolor": "64A8BD",
+  "iconsel": "",
+  "rompath": "../../Roms/PSPMINIS",
+  "imgpath": "../../Imgs/PSPMINIS",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "zip|7z",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

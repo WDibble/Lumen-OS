@@ -1,0 +1,19 @@
+{
+  "label": "Game Boy Advance",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "38BDF8",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/GBA",
+  "imgpath": "../../Imgs/GBA",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "bin|gba|agb|gbz|zip|7z",
+  "launchlist": [
+    {
+      "name": "Default (mgba)",
+      "launch": "launch.sh"
+    }
+  ]
+}

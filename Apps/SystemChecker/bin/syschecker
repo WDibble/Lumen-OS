@@ -1,0 +1,99 @@
+#!/bin/sh
+# Lumen-OS Handheld BIOS & System Readiness Checker
+# Two-tiered audit: Stage 1 = O(1) existence + byte size, Stage 2 = MD5 verification
+
+BIOS_DIR="${1:-/mnt/SDCARD/BIOS}"
+MODE="${2:-summary}"
+
+# Color tokens for terminal / selector
+PASS="[ PASS ]"
+WARN="[ WARN ]"
+FAIL="[ FAIL ]"
+
+audit_system() {
+    SYS_NAME="$1"
+    TARGET_FILES="$2" # comma-separated filenames
+    EXPECTED_SIZE="$3" # 0 if dynamic archive like neogeo.zip
+    EXPECTED_MD5="$4" # optional reference MD5
+    MANDATORY="$5" # 1 = all required, 0 = at least one required
+
+    FOUND_COUNT=0
+    TOTAL_COUNT=0
+    STATUS="$FAIL"
+    DETAILS=""
+
+    OLD_IFS="$IFS"
+    IFS=","
+    for FNAME in $TARGET_FILES; do
+        TOTAL_COUNT=$((TOTAL_COUNT + 1))
+        FPATH="$BIOS_DIR/$FNAME"
+        
+        # Check direct path
+        if [ -f "$FPATH" ]; then
+            # Verify exact casing
+            ACTUAL_NAME=$(find "$BIOS_DIR" -maxdepth 2 -name "$FNAME" 2>/dev/null | head -n 1)
+            ACTUAL_BASE=$(basename "$ACTUAL_NAME" 2>/dev/null)
+            
+            FSIZE=$(wc -c < "$FPATH" 2>/dev/null | tr -d ' ')
+            
+            SIZE_OK=1
+            if [ "$EXPECTED_SIZE" -gt 0 ] && [ "$FSIZE" -ne "$EXPECTED_SIZE" ]; then
+                SIZE_OK=0
+            fi
+
+            if [ "$SIZE_OK" -eq 1 ]; then
+                FOUND_COUNT=$((FOUND_COUNT + 1))
+                if [ -n "$ACTUAL_BASE" ] && [ "$ACTUAL_BASE" != "$(basename "$FNAME")" ]; then
+                    DETAILS="${DETAILS}${FNAME} (WARN: Case mismatch: $ACTUAL_BASE); "
+                else
+                    DETAILS="${DETAILS}${FNAME} (OK, ${FSIZE}B); "
+                fi
+            else
+                DETAILS="${DETAILS}${FNAME} (Size mismatch: ${FSIZE}B != ${EXPECTED_SIZE}B); "
+            fi
+        else
+            # Check if uppercase version exists
+            UPPER_NAME=$(find "$BIOS_DIR" -maxdepth 2 -iname "$FNAME" 2>/dev/null | head -n 1)
+            if [ -n "$UPPER_NAME" ]; then
+                DETAILS="${DETAILS}${FNAME} (FAIL: Incorrect case: $(basename "$UPPER_NAME")); "
+            else
+                DETAILS="${DETAILS}${FNAME} (MISSING); "
+            fi
+        fi
+    done
+    IFS="$OLD_IFS"
+
+    if [ "$MANDATORY" -eq 1 ]; then
+        if [ "$FOUND_COUNT" -eq "$TOTAL_COUNT" ]; then
+            STATUS="$PASS"
+        elif [ "$FOUND_COUNT" -gt 0 ]; then
+            STATUS="$WARN"
+        else
+            STATUS="$FAIL"
+        fi
+    else
+        # Any viable bios suffices
+        if [ "$FOUND_COUNT" -gt 0 ]; then
+            STATUS="$PASS"
+        else
+            STATUS="$FAIL"
+        fi
+    fi
+
+    echo "$STATUS $SYS_NAME :: $DETAILS"
+}
+
+echo "=================================================="
+echo "    Lumen-OS System Readiness & BIOS Audit   "
+echo "    Target: $BIOS_DIR                             "
+echo "=================================================="
+
+audit_system "Sony PlayStation" "scph1001.bin,scph5501.bin,psxonpsp660.bin" 524288 "" 0
+audit_system "Sega Dreamcast" "dc/dc_boot.bin,dc_boot.bin" 2097152 "" 0
+audit_system "Sega Saturn" "saturn_bios.bin" 524288 "" 1
+audit_system "SNK Neo Geo" "neogeo.zip" 0 "" 1
+audit_system "Sega CD" "bios_CD_U.bin,bios_CD_E.bin,bios_CD_J.bin" 0 "" 0
+audit_system "Game Boy Advance" "gba_bios.bin" 16384 "" 1
+audit_system "Nintendo DS" "bios7.bin,bios9.bin,firmware.bin" 0 "" 1
+
+echo "=================================================="

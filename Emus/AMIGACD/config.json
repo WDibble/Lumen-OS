@@ -1,0 +1,19 @@
+{
+  "label": "AMIGA CD32",
+  "icon": "icon.png",
+  "background": "/mnt/SDCARD/Backgrounds/Default/AMIGACD.png",
+  "iconsel": "",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/AMIGACD",
+  "imgpath": "../../Imgs/AMIGACD",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "",
+  "launchlist": [
+    {
+      "name": "Default",
+      "launch": "launch.sh"
+    }
+  ]
+}

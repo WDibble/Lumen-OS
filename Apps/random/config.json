@@ -1,0 +1,8 @@
+{
+  "label": "Random",
+  "icon": "/mnt/SDCARD/Icons/Default/Apps/random.png",
+  "iconsel": "icon.png",
+  "launch": "launch.sh",
+  "description": "Chooses Random Emulator and Rom",
+  "icontop": ""
+}

@@ -1,0 +1,19 @@
+{
+  "label": "Sony PlayStation",
+  "icon": "icon.png",
+  "background": "bg.png",
+  "themecolor": "60A5FA",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/PS",
+  "imgpath": "../../Imgs/PS",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "chd|pbp|cue|bin|iso|m3u",
+  "launchlist": [
+    {
+      "name": "Default (pcsx_rearmed)",
+      "launch": "launch.sh"
+    }
+  ]
+}
