@@ -20,8 +20,10 @@ cleanup() {
     # 2. Remove stick disable lock
     rm -f /var/trimui_inputd/sticks_disabled 2>/dev/null || true
 
-    # 3. Restore double-buffered virtual framebuffer geometry
-    if [ -x /mnt/SDCARD/System/bin/fbset ]; then
+    # 3. Restore double-buffered virtual framebuffer geometry (polymorphic device restoration)
+    if [ -x /mnt/SDCARD/System/bin/next-hw ]; then
+        /mnt/SDCARD/System/bin/next-hw display --restore 2>/dev/null || true
+    elif [ -x /mnt/SDCARD/System/bin/fbset ]; then
         /mnt/SDCARD/System/bin/fbset -g 1280 720 1280 1440 32 2>/dev/null || true
     elif command -v fbset >/dev/null 2>&1; then
         fbset -g 1280 720 1280 1440 32 2>/dev/null || true

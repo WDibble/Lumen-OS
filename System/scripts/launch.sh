@@ -77,9 +77,13 @@ cleanup() {
     # Terminate watchdog
     kill "$WATCHDOG_PID" 2>/dev/null || true
 
-    # Framebuffer restoration (Double-buffered 1440 virtual height for MainUI page flipping)
-    fbset -g 1280 720 1280 1440 32 2>/dev/null || true
-    echo 0 > /sys/class/graphics/fb0/blank 2>/dev/null || true
+    # Framebuffer restoration (Multi-device dynamic geometry & unblank)
+    if [ -x "$HW_TOOL" ]; then
+        "$HW_TOOL" display --restore 2>/dev/null || true
+    else
+        fbset -g 1280 720 1280 1440 32 2>/dev/null || true
+        echo 0 > /sys/class/graphics/fb0/blank 2>/dev/null || true
+    fi
 
     # Restore CPU governor
     if [ -x "$HW_TOOL" ]; then

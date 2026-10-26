@@ -49,9 +49,13 @@ cleanup() {
     umount -l /tmp/lumen/mnt/* 2>/dev/null || true
     losetup -D 2>/dev/null || true
 
-    # Allwinner Sunxi Framebuffer restoration (Double-buffered 1440 height for MainUI page flipping)
-    fbset -g 1280 720 1280 1440 32 2>/dev/null || true
-    echo 0 > /sys/class/graphics/fb0/blank 2>/dev/null || true
+    # Multi-device Framebuffer restoration (Double-buffered MainUI page flipping & offset restoral)
+    if [ -x "/mnt/SDCARD/System/bin/next-hw" ]; then
+        /mnt/SDCARD/System/bin/next-hw display --restore 2>/dev/null || true
+    else
+        fbset -g 1280 720 1280 1440 32 2>/dev/null || true
+        echo 0 > /sys/class/graphics/fb0/blank 2>/dev/null || true
+    fi
 
     # Restore hardware governors & LEDs
     if [ -x "/mnt/SDCARD/System/bin/next-hw" ]; then

@@ -775,5 +775,174 @@ class TestLumenNext(unittest.TestCase):
             self.assertIn("/mnt/SDCARD/System/res/boot.bmp", t)
             self.assertNotIn("/dev/mmcblk0p1", t)
 
+    def test_31_multidevice_hardware_detection(self):
+        """Verify dynamic hardware model and resolution detection for all TrimUI devices."""
+        hw_bin = f"{REPO_ROOT}/System/bin/next-hw"
+        self.assertTrue(os.path.isfile(hw_bin) and os.access(hw_bin, os.X_OK))
+
+        profiles = {
+            "tsp": ("TrimUI Smart Pro", "1280 720", 0, 1),
+            "tsp-s": ("TrimUI Smart Pro S", "1280 720", 1, 1),
+            "brick": ("TrimUI Brick", "1024 768", 0, 0),
+            "smart": ("TrimUI Smart", "320 240", 0, 0),
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            for model, (name, res, has_fan, has_rings) in profiles.items():
+                env = os.environ.copy()
+                env["LUMEN_DEVICE_OVERRIDE"] = model
+                env["STATE_DIR"] = os.path.join(tmpdir, model)
+                os.makedirs(env["STATE_DIR"], exist_ok=True)
+
+                # Check --get-model
+                res_model = subprocess.run([hw_bin, "detect", "--get-model"], env=env, capture_output=True, text=True)
+                self.assertEqual(res_model.returncode, 0)
+                self.assertEqual(res_model.stdout.strip(), model)
+
+                # Check --get-res
+                res_res = subprocess.run([hw_bin, "detect", "--get-res"], env=env, capture_output=True, text=True)
+                self.assertEqual(res_res.returncode, 0)
+                self.assertEqual(res_res.stdout.strip(), res)
+
+                # Check hardware.env values
+                res_dump = subprocess.run([hw_bin, "detect", "--dump"], env=env, capture_output=True, text=True)
+                self.assertEqual(res_dump.returncode, 0)
+                self.assertIn(f"DEVICE_MODEL={model}", res_dump.stdout)
+                self.assertIn(f'DEVICE_NAME="{name}"', res_dump.stdout)
+                self.assertIn(f"HAS_FAN={has_fan}", res_dump.stdout)
+                self.assertIn(f"HAS_RINGS={has_rings}", res_dump.stdout)
+
+    def test_32_multidevice_fan_control(self):
+        """Verify active fan management on fan-equipped devices and clean no-op on passive devices."""
+        hw_bin = f"{REPO_ROOT}/System/bin/next-hw"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 1. Passive device behavior (e.g. tsp or brick)
+            env_passive = os.environ.copy()
+            env_passive["LUMEN_DEVICE_OVERRIDE"] = "tsp"
+            env_passive["STATE_DIR"] = os.path.join(tmpdir, "passive_state")
+            os.makedirs(env_passive["STATE_DIR"], exist_ok=True)
+
+            res = subprocess.run([hw_bin, "fan", "--get-fan"], env=env_passive, capture_output=True, text=True)
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("PROFILE=passive PWM=0", res.stdout)
+
+            # Profile changes on passive device return 0 gracefully
+            res_quiet = subprocess.run([hw_bin, "fan", "--profile", "quiet"], env=env_passive, capture_output=True, text=True)
+            self.assertEqual(res_quiet.returncode, 0)
+
+            # 2. Active cooling device behavior (tsp-s)
+            env_active = os.environ.copy()
+            env_active["LUMEN_DEVICE_OVERRIDE"] = "tsp-s"
+            env_active["STATE_DIR"] = os.path.join(tmpdir, "active_state")
+            os.makedirs(env_active["STATE_DIR"], exist_ok=True)
+
+            # Test quiet profile (sets PWM 64)
+            subprocess.run([hw_bin, "fan", "--profile", "quiet"], env=env_active, check=True)
+            res_fan = subprocess.run([hw_bin, "fan", "--get-fan"], env=env_active, capture_output=True, text=True)
+            self.assertIn("PROFILE=quiet", res_fan.stdout)
+            self.assertIn("PWM=64", res_fan.stdout)
+
+            # Test balanced profile (sets PWM 128)
+            subprocess.run([hw_bin, "fan", "--profile", "balanced"], env=env_active, check=True)
+            res_fan = subprocess.run([hw_bin, "fan", "--get-fan"], env=env_active, capture_output=True, text=True)
+            self.assertIn("PROFILE=balanced", res_fan.stdout)
+            self.assertIn("PWM=128", res_fan.stdout)
+
+            # Test performance profile (sets PWM 200)
+            subprocess.run([hw_bin, "fan", "--profile", "performance"], env=env_active, check=True)
+            res_fan = subprocess.run([hw_bin, "fan", "--get-fan"], env=env_active, capture_output=True, text=True)
+            self.assertIn("PROFILE=performance", res_fan.stdout)
+            self.assertIn("PWM=200", res_fan.stdout)
+
+            # Test max profile (sets PWM 255)
+            subprocess.run([hw_bin, "fan", "--profile", "max"], env=env_active, check=True)
+            res_fan = subprocess.run([hw_bin, "fan", "--get-fan"], env=env_active, capture_output=True, text=True)
+            self.assertIn("PROFILE=max", res_fan.stdout)
+            self.assertIn("PWM=255", res_fan.stdout)
+
+            # Test manual PWM set
+            subprocess.run([hw_bin, "fan", "--set", "180"], env=env_active, check=True)
+            res_fan = subprocess.run([hw_bin, "fan", "--get-fan"], env=env_active, capture_output=True, text=True)
+            self.assertIn("PWM=180", res_fan.stdout)
+
+    def test_33_multidevice_led_routing(self):
+        """Verify polymorphic LED routing for stick rings (TSP/TSP-S) vs ambient bar (Brick)."""
+        hw_bin = f"{REPO_ROOT}/System/bin/next-hw"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            mock_sysfs = os.path.join(tmpdir, "sys/class/led_anim")
+            os.makedirs(mock_sysfs, exist_ok=True)
+
+            # Create mock sysfs files for TSP (stick rings)
+            for f in ["effect_enable", "effect_rgb_hex_lr", "max_scale_lr"]:
+                with open(os.path.join(mock_sysfs, f), "w") as fp:
+                    fp.write("0\n")
+
+            with open(hw_bin) as f:
+                content = f.read()
+
+            patched = content.replace(
+                'LED_SYSFS="/sys/class/led_anim"', f'LED_SYSFS="{mock_sysfs}"'
+            )
+            test_hw = os.path.join(tmpdir, "next-hw-led")
+            with open(test_hw, "w") as f:
+                f.write(patched)
+            os.chmod(test_hw, 0o755)
+
+            env = os.environ.copy()
+            env["STATE_DIR"] = os.path.join(tmpdir, "state")
+            os.makedirs(env["STATE_DIR"], exist_ok=True)
+
+            # Test TSP routing
+            env["LUMEN_DEVICE_OVERRIDE"] = "tsp"
+            subprocess.run([test_hw, "led", "--hex", "003366", "--brightness", "80"], env=env, check=True)
+            with open(os.path.join(mock_sysfs, "effect_rgb_hex_lr")) as fp:
+                self.assertEqual(fp.read().strip(), "003366")
+            with open(os.path.join(mock_sysfs, "max_scale_lr")) as fp:
+                # 80 * 60 / 100 = 48
+                self.assertEqual(fp.read().strip(), "48")
+
+            # Remove ring node, create Brick ambient bar node
+            os.remove(os.path.join(mock_sysfs, "effect_rgb_hex_lr"))
+            with open(os.path.join(mock_sysfs, "effect_rgb_hex_m"), "w") as fp:
+                fp.write("0\n")
+            with open(os.path.join(mock_sysfs, "max_scale_f1f2"), "w") as fp:
+                fp.write("0\n")
+
+            # Test Brick routing
+            env["LUMEN_DEVICE_OVERRIDE"] = "brick"
+            subprocess.run([test_hw, "led", "--hex", "FF5500", "--brightness", "50"], env=env, check=True)
+            with open(os.path.join(mock_sysfs, "effect_rgb_hex_m")) as fp:
+                self.assertEqual(fp.read().strip(), "FF5500")
+            with open(os.path.join(mock_sysfs, "max_scale_f1f2")) as fp:
+                # 50 * 60 / 100 = 30
+                self.assertEqual(fp.read().strip(), "30")
+
+    def test_34_fandaemon_lifecycle(self):
+        """Verify active cooling daemon syntax, Schmitt trigger curve, and passive exit."""
+        daemon_script = f"{REPO_ROOT}/System/init.d/S17_fandaemon.sh"
+        hwdetect_script = f"{REPO_ROOT}/System/init.d/S01_hwdetect.sh"
+
+        self.assertTrue(os.path.isfile(daemon_script) and os.access(daemon_script, os.X_OK))
+        self.assertTrue(os.path.isfile(hwdetect_script) and os.access(hwdetect_script, os.X_OK))
+
+        # Check POSIX sh syntax
+        res = subprocess.run(["sh", "-n", daemon_script], capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, f"Syntax error in S17_fandaemon.sh: {res.stderr}")
+
+        res = subprocess.run(["sh", "-n", hwdetect_script], capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, f"Syntax error in S01_hwdetect.sh: {res.stderr}")
+
+        with open(daemon_script) as f:
+            t = f.read()
+            self.assertIn("HAS_FAN", t)
+            self.assertIn("TARGET_PWM", t)
+            self.assertIn("quiet", t)
+            self.assertIn("performance", t)
+            self.assertIn("max", t)
+            # Schmitt trigger / hysteresis dwell check
+            self.assertIn("ELAPSED=$(( NOW - LAST_DOWN_TIME ))", t)
+            # Emergency ceiling override (>75C -> 255)
+            self.assertIn("255", t)
+
 if __name__ == "__main__":
     unittest.main()

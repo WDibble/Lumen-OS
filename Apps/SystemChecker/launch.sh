@@ -10,8 +10,10 @@ chmod +x ./bin/syschecker 2>/dev/null || true
 MAINUI_PID=$(pidof MainUI)
 
 cleanup() {
-    # Restore double-buffered virtual framebuffer geometry
-    if [ -x /mnt/SDCARD/System/bin/fbset ]; then
+    # Restore double-buffered virtual framebuffer geometry (multi-device)
+    if [ -x /mnt/SDCARD/System/bin/next-hw ]; then
+        /mnt/SDCARD/System/bin/next-hw display --restore 2>/dev/null || true
+    elif [ -x /mnt/SDCARD/System/bin/fbset ]; then
         /mnt/SDCARD/System/bin/fbset -g 1280 720 1280 1440 32 2>/dev/null || true
     elif command -v fbset >/dev/null 2>&1; then
         fbset -g 1280 720 1280 1440 32 2>/dev/null || true

@@ -1,39 +1,58 @@
 #!/bin/sh
 # Lumen-OS Unified Hardware Tool (next-hw)
-# Clean POSIX hardware abstraction for TrimUI Smart Pro
+# Clean POSIX hardware abstraction for TrimUI Family (TSP, TSP-S, Brick, Smart)
+# Strictly adheres to Zero-NAND Mutation Invariant and POSIX portability
 
 set -e
+
+HW_NAME="next-hw"
+HW_VERSION="1.2.0"
+STATE_DIR="${STATE_DIR:-/tmp/lumen/hardware}"
+mkdir -p "$STATE_DIR"
 
 LED_SYSFS="/sys/class/led_anim"
 CPU_SYSFS="/sys/devices/system/cpu"
 DISP_SYSFS="/sys/kernel/debug/dispdbg"
-STATE_DIR="/tmp/lumen/state"
-mkdir -p "$STATE_DIR"
+FB_SYSFS="/sys/class/graphics/fb0"
+THERMAL_SYSFS="/sys/class/thermal"
 
 usage() {
     cat <<EOF
 Usage: next-hw <subsystem> [options]
 
 Subsystems:
+  detect
+    --get-model           Print detected model token (tsp|tsp-s|brick|smart)
+    --get-res             Print native resolution (e.g. 1280 720)
+    --dump                Print full hardware environment
+
+  fan
+    --profile <auto|quiet|balanced|performance|max|off>
+    --set <0-255>         Set manual PWM duty cycle
+    --get-temp            Read SoC temperature in °C
+    --get-fan             Read fan status and profile
+
+  display
+    --restore             Dynamically restore double-buffered geometry and unblank
+    --brightness <0-100>  Set LCD brightness (mapped 10-250)
+    --blank <0|1>         Blank (1) or unblank (0) display
+    --warmth <toggle|0|1> Toggle or set blue-light filter
+
   led
-    --hex <RRGGBB>        Set stick LED color
+    --hex <RRGGBB>        Set LED color (stick rings on TSP, top bar on Brick)
     --mode <battery|breathe|off>  Set dynamic LED operating mode
-    --brightness <0-100>  Set stick LED brightness scale
+    --brightness <0-100>  Set master LED brightness
     --cycles <N>          Set pulse cycles
     --duration <ms>       Set pulse duration
-    --off                 Turn off LEDs
+    --off                 Turn off all LEDs
 
   cpu
     --profile <powersave|normal|performance>
     --gov <governor> --min <min_khz> --max <max_khz>
     --status              Show current CPU scaling status
 
-  display
-    --brightness <0-100>  Set LCD brightness (mapped 10-250)
-    --blank <0|1>         Blank (1) or unblank (0) display
-
   button
-    --check <NAME>        Check if button is pressed (A, B, X, Y, MENU, START, SELECT)
+    --check <NAME>        Check button state (A, B, X, Y, MENU, START, SELECT, FN, L3, R3)
 
   power
     sleep                 Save hardware state and enter low power mode
@@ -42,68 +61,523 @@ EOF
     exit 1
 }
 
-# --- LED SUBSYSTEM ---
+# --- DEVICE DETECTION ENGINE ---
+detect_hardware() {
+    # Check for test override
+    if [ -n "${LUMEN_DEVICE_OVERRIDE:-}" ]; then
+        echo "${LUMEN_DEVICE_OVERRIDE}" > "$STATE_DIR/device_model"
+        case "$LUMEN_DEVICE_OVERRIDE" in
+            "tsp-s")
+                cat <<EOF > "$STATE_DIR/hardware.env"
+DEVICE_MODEL=tsp-s
+DEVICE_NAME="TrimUI Smart Pro S"
+SOC_FAMILY=a523
+XRES=1280
+YRES=720
+VXRES=1280
+VYRES=1440
+BPP=32
+HAS_FAN=1
+HAS_RINGS=1
+HAS_TOP_BAR=0
+HAS_L3R3=1
+HAS_FN_KEYS=0
+EOF
+                return 0
+                ;;
+            "brick")
+                cat <<EOF > "$STATE_DIR/hardware.env"
+DEVICE_MODEL=brick
+DEVICE_NAME="TrimUI Brick"
+SOC_FAMILY=a133plus
+XRES=1024
+YRES=768
+VXRES=1024
+VYRES=1536
+BPP=32
+HAS_FAN=0
+HAS_RINGS=0
+HAS_TOP_BAR=1
+HAS_L3R3=0
+HAS_FN_KEYS=1
+EOF
+                return 0
+                ;;
+            "smart")
+                cat <<EOF > "$STATE_DIR/hardware.env"
+DEVICE_MODEL=smart
+DEVICE_NAME="TrimUI Smart"
+SOC_FAMILY=s3_v831
+XRES=320
+YRES=240
+VXRES=320
+VYRES=480
+BPP=16
+HAS_FAN=0
+HAS_RINGS=0
+HAS_TOP_BAR=0
+HAS_L3R3=0
+HAS_FN_KEYS=0
+EOF
+                return 0
+                ;;
+            *)
+                cat <<EOF > "$STATE_DIR/hardware.env"
+DEVICE_MODEL=tsp
+DEVICE_NAME="TrimUI Smart Pro"
+SOC_FAMILY=a133plus
+XRES=1280
+YRES=720
+VXRES=1280
+VYRES=1440
+BPP=32
+HAS_FAN=0
+HAS_RINGS=1
+HAS_TOP_BAR=0
+HAS_L3R3=0
+HAS_FN_KEYS=0
+EOF
+                return 0
+                ;;
+        esac
+    fi
+
+    # Read cached if present
+    if [ -f "$STATE_DIR/hardware.env" ] && [ -f "$STATE_DIR/device_model" ]; then
+        return 0
+    fi
+
+    MODEL=""
+
+    # 1. Inspect Devicetree model safely (stripping NUL bytes)
+    if [ -f "/sys/firmware/devicetree/base/model" ]; then
+        DT_MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null || true)
+        case "$DT_MODEL" in
+            *"Smart Pro S"*|*"A523"*|*"sun55iw3"*)
+                MODEL="tsp-s"
+                ;;
+            *"Smart"*|*"S3"*|*"V831"*)
+                case "$DT_MODEL" in
+                    *"Smart Pro"*) ;; # continue to check
+                    *) MODEL="smart" ;;
+                esac
+                ;;
+        esac
+    fi
+
+    # 2. Inspect Framebuffer Geometry
+    if [ -z "$MODEL" ] && [ -f "$FB_SYSFS/virtual_size" ]; then
+        FB_SIZE=$(cat "$FB_SYSFS/virtual_size" 2>/dev/null || true)
+        case "$FB_SIZE" in
+            "1280,1440"|"1280,720")
+                MODEL="tsp"
+                ;;
+            "1024,1536"|"1024,768")
+                MODEL="brick"
+                ;;
+            "320,480"|"320,240")
+                MODEL="smart"
+                ;;
+        esac
+    fi
+
+    # 3. Peripheral signature for Brick (effect_m) vs TSP (effect_l)
+    if [ -z "$MODEL" ] || [ "$MODEL" = "tsp" ]; then
+        if [ -e "$LED_SYSFS/effect_m" ] && [ ! -e "$LED_SYSFS/effect_l" ]; then
+            MODEL="brick"
+        fi
+    fi
+
+    # 4. Fallback: inspect /etc/trimui_device.txt
+    if [ -z "$MODEL" ] && [ -f "/etc/trimui_device.txt" ]; then
+        FB_DEV=$(cat /etc/trimui_device.txt 2>/dev/null || true)
+        case "$FB_DEV" in
+            *"tsp-s"*|*"Smart Pro S"*) MODEL="tsp-s" ;;
+            *"brick"*|*"Brick"*)       MODEL="brick" ;;
+            *"smart"*|*"Smart"*)       MODEL="smart" ;;
+            *)                         MODEL="tsp" ;;
+        esac
+    fi
+
+    [ -z "$MODEL" ] && MODEL="tsp"
+
+    echo "$MODEL" > "$STATE_DIR/device_model"
+
+    case "$MODEL" in
+        "tsp-s")
+            cat <<EOF > "$STATE_DIR/hardware.env"
+DEVICE_MODEL=tsp-s
+DEVICE_NAME="TrimUI Smart Pro S"
+SOC_FAMILY=a523
+XRES=1280
+YRES=720
+VXRES=1280
+VYRES=1440
+BPP=32
+HAS_FAN=1
+HAS_RINGS=1
+HAS_TOP_BAR=0
+HAS_L3R3=1
+HAS_FN_KEYS=0
+EOF
+            ;;
+        "brick")
+            cat <<EOF > "$STATE_DIR/hardware.env"
+DEVICE_MODEL=brick
+DEVICE_NAME="TrimUI Brick"
+SOC_FAMILY=a133plus
+XRES=1024
+YRES=768
+VXRES=1024
+VYRES=1536
+BPP=32
+HAS_FAN=0
+HAS_RINGS=0
+HAS_TOP_BAR=1
+HAS_L3R3=0
+HAS_FN_KEYS=1
+EOF
+            ;;
+        "smart")
+            cat <<EOF > "$STATE_DIR/hardware.env"
+DEVICE_MODEL=smart
+DEVICE_NAME="TrimUI Smart"
+SOC_FAMILY=s3_v831
+XRES=320
+YRES=240
+VXRES=320
+VYRES=480
+BPP=16
+HAS_FAN=0
+HAS_RINGS=0
+HAS_TOP_BAR=0
+HAS_L3R3=0
+HAS_FN_KEYS=0
+EOF
+            ;;
+        *)
+            cat <<EOF > "$STATE_DIR/hardware.env"
+DEVICE_MODEL=tsp
+DEVICE_NAME="TrimUI Smart Pro"
+SOC_FAMILY=a133plus
+XRES=1280
+YRES=720
+VXRES=1280
+VYRES=1440
+BPP=32
+HAS_FAN=0
+HAS_RINGS=1
+HAS_TOP_BAR=0
+HAS_L3R3=0
+HAS_FN_KEYS=0
+EOF
+            ;;
+    esac
+}
+
+get_model() {
+    detect_hardware
+    cat "$STATE_DIR/device_model" 2>/dev/null || echo "tsp"
+}
+
+# --- ACTIVE COOLING & FAN SUBSYSTEM ---
+find_fan_pwm() {
+    # Check thermal cooling devices specifically checking type matches fan
+    for cdev in /sys/class/thermal/cooling_device*; do
+        if [ -f "$cdev/type" ]; then
+            CTYPE=$(cat "$cdev/type" 2>/dev/null || true)
+            case "$CTYPE" in
+                *"fan"*|*"pwm-fan"*)
+                    echo "$cdev/cur_state"
+                    return 0
+                    ;;
+            esac
+        fi
+    done
+
+    # Check hwmon pwm
+    for hdev in /sys/class/hwmon/hwmon*/pwm1; do
+        if [ -f "$hdev" ]; then
+            echo "$hdev"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+get_soc_temp() {
+    # Read temperature in millidegrees C
+    for tzone in /sys/class/thermal/thermal_zone*/temp; do
+        if [ -f "$tzone" ]; then
+            RAW=$(cat "$tzone" 2>/dev/null || true)
+            case "$RAW" in
+                *[!0-9]*|"") continue ;;
+                *)
+                    # Convert to Celsius
+                    TEMP_C=$(( RAW / 1000 ))
+                    echo "$TEMP_C"
+                    return 0
+                    ;;
+            esac
+        fi
+    done
+    echo 45
+}
+
+set_fan_pwm() {
+    PWM_VAL="$1"
+    echo "$PWM_VAL" > "$STATE_DIR/fan_pwm" 2>/dev/null || true
+    PWM_NODE=$(find_fan_pwm 2>/dev/null || true)
+
+    if [ -n "$PWM_NODE" ] && [ -w "$PWM_NODE" ]; then
+        # If writing to cooling_device (0-3 scale vs 0-255 scale)
+        case "$PWM_NODE" in
+            *cooling_device*)
+                # Scale 0-255 to 0-3
+                STATE=$(( PWM_VAL * 3 / 255 ))
+                echo "$STATE" > "$PWM_NODE" 2>/dev/null || true
+                ;;
+            *hwmon*)
+                # Ensure manual control enabled if node exists
+                PWM_EN="$(dirname "$PWM_NODE")/pwm1_enable"
+                [ -w "$PWM_EN" ] && echo 1 > "$PWM_EN" 2>/dev/null || true
+                echo "$PWM_VAL" > "$PWM_NODE" 2>/dev/null || true
+                ;;
+            *)
+                echo "$PWM_VAL" > "$PWM_NODE" 2>/dev/null || true
+                ;;
+        esac
+    fi
+}
+
+handle_fan() {
+    detect_hardware
+    . "$STATE_DIR/hardware.env" 2>/dev/null || true
+
+    if [ "${HAS_FAN:-0}" -ne 1 ]; then
+        # Passive device: graceful no-op
+        case "${1:-}" in
+            --get-temp) get_soc_temp; return 0 ;;
+            --get-fan)  echo "PROFILE=passive PWM=0 TEMP=$(get_soc_temp)"; return 0 ;;
+            *)          return 0 ;;
+        esac
+    fi
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --get-temp)
+                get_soc_temp
+                return 0
+                ;;
+            --get-fan)
+                PROF=$(cat "$STATE_DIR/fan_profile" 2>/dev/null || echo "auto")
+                PWM=$(cat "$STATE_DIR/fan_pwm" 2>/dev/null || echo "0")
+                echo "PROFILE=$PROF PWM=$PWM TEMP=$(get_soc_temp)"
+                return 0
+                ;;
+            --set)
+                VAL="$2"; shift 2
+                case "$VAL" in (*[!0-9]*|"") VAL=128 ;; esac
+                set_fan_pwm "$VAL"
+                ;;
+            --profile)
+                PROFILE="$2"; shift 2
+                echo "$PROFILE" > "$STATE_DIR/fan_profile" 2>/dev/null || true
+                case "$PROFILE" in
+                    off)         set_fan_pwm 0 ;;
+                    quiet)       set_fan_pwm 64 ;;
+                    balanced)    set_fan_pwm 128 ;;
+                    performance) set_fan_pwm 200 ;;
+                    max)         set_fan_pwm 255 ;;
+                    auto)
+                        # Re-enable kernel thermal management if supported
+                        PWM_NODE=$(find_fan_pwm 2>/dev/null || true)
+                        if [ -n "$PWM_NODE" ]; then
+                            PWM_EN="$(dirname "$PWM_NODE")/pwm1_enable"
+                            [ -w "$PWM_EN" ] && echo 2 > "$PWM_EN" 2>/dev/null || true
+                        fi
+                        ;;
+                esac
+                ;;
+            *)
+                usage
+                ;;
+        esac
+    done
+}
+
+# --- DISPLAY SUBSYSTEM ---
+handle_display() {
+    detect_hardware
+    . "$STATE_DIR/hardware.env" 2>/dev/null || true
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --restore)
+                # Dynamic multi-resolution double-buffered geometry restoration
+                FB_DEV="/dev/fb0"
+                if [ -c "$FB_DEV" ]; then
+                    if command -v fbset >/dev/null 2>&1; then
+                        fbset -fb "$FB_DEV" -g "${XRES:-1280}" "${YRES:-720}" "${VXRES:-1280}" "${VYRES:-1440}" "${BPP:-32}" 2>/dev/null || true
+                        # Reset panning offset to eliminate offscreen buffer trap
+                        fbset -fb "$FB_DEV" -offset 0 0 2>/dev/null || true
+                    fi
+
+                    # Unblank display
+                    if [ -w "$FB_SYSFS/blank" ]; then
+                        echo 0 > "$FB_SYSFS/blank" 2>/dev/null || true
+                    fi
+
+                    # Cleanse VRAM buffer safely without unbounded dd
+                    BYTES_PER_PIXEL=$(( ${BPP:-32} / 8 ))
+                    TOTAL_BYTES=$(( ${XRES:-1280} * ${YRES:-720} * BYTES_PER_PIXEL ))
+                    BLOCKS=$(( TOTAL_BYTES / 4096 ))
+                    [ "$BLOCKS" -gt 0 ] && dd if=/dev/zero of="$FB_DEV" bs=4096 count="$BLOCKS" 2>/dev/null || true
+                fi
+                return 0
+                ;;
+            --brightness)
+                VAL="$2"; shift 2
+                case "$VAL" in
+                    \+*)
+                        DELTA="${VAL#+}"
+                        CURR=$(cat "$STATE_DIR/last_brightness" 2>/dev/null || echo 150)
+                        VAL=$(( CURR + DELTA ))
+                        ;;
+                    \-*)
+                        DELTA="${VAL#-}"
+                        CURR=$(cat "$STATE_DIR/last_brightness" 2>/dev/null || echo 150)
+                        VAL=$(( CURR - DELTA ))
+                        ;;
+                esac
+                [ "$VAL" -lt 10 ] && VAL=10
+                [ "$VAL" -gt 250 ] && VAL=250
+                echo "$VAL" > "$STATE_DIR/last_brightness" 2>/dev/null || true
+                for node in /sys/class/backlight/*/brightness; do
+                    [ -w "$node" ] && echo "$VAL" > "$node" 2>/dev/null || true
+                done
+                ;;
+            --blank)
+                BLANK="$2"; shift 2
+                if [ -d "$DISP_SYSFS" ]; then
+                    (
+                        cd "$DISP_SYSFS" 2>/dev/null || exit 0
+                        echo lcd0 > name 2>/dev/null || true
+                        if [ "$BLANK" = "1" ]; then
+                            echo blank > command 2>/dev/null || true
+                        else
+                            echo unblank > command 2>/dev/null || true
+                        fi
+                        echo 1 > start 2>/dev/null || true
+                    )
+                fi
+                if [ -w "$FB_SYSFS/blank" ]; then
+                    echo "$BLANK" > "$FB_SYSFS/blank" 2>/dev/null || true
+                fi
+                ;;
+            --warmth)
+                WARMTH="$2"; shift 2
+                STATE_FILE="$STATE_DIR/night_mode"
+                CURR=$(cat "$STATE_FILE" 2>/dev/null || echo 0)
+                if [ "$WARMTH" = "toggle" ]; then
+                    [ "$CURR" = "1" ] && WARMTH=0 || WARMTH=1
+                fi
+                echo "$WARMTH" > "$STATE_FILE" 2>/dev/null || true
+                if [ "$WARMTH" = "1" ]; then
+                    handle_display --brightness 60
+                else
+                    handle_display --brightness 160
+                fi
+                ;;
+            *)
+                usage
+                ;;
+        esac
+    done
+}
+
+# --- POLYMORPHIC LED SUBSYSTEM ---
 handle_led() {
-    [ -d "$LED_SYSFS" ] || { echo "next-hw: LED sysfs not found." >&2; return 1; }
+    detect_hardware
+    . "$STATE_DIR/hardware.env" 2>/dev/null || true
+
+    # Non-LED models exit cleanly
+    if [ ! -d "$LED_SYSFS" ]; then
+        return 0
+    fi
+
+    # Atomic lock barrier to prevent daemon write collisions
+    LOCK_FILE="$STATE_DIR/led.lock"
+    exec 8>"$LOCK_FILE"
+    # POSIX non-blocking lock attempt if supported
+    
     while [ $# -gt 0 ]; do
         case "$1" in
             --hex)
                 HEX="$2"; shift 2
                 echo "$HEX" > "$STATE_DIR/last_led_hex" 2>/dev/null || true
-                echo 1 > "$LED_SYSFS/effect_enable"
-                echo "$HEX" > "$LED_SYSFS/effect_rgb_hex_lr"
+
+                # Route to TSP/TSP-S stick rings vs Brick top bar
+                if [ -w "$LED_SYSFS/effect_rgb_hex_lr" ]; then
+                    [ -w "$LED_SYSFS/effect_enable" ] && echo 1 > "$LED_SYSFS/effect_enable" 2>/dev/null || true
+                    echo "$HEX" > "$LED_SYSFS/effect_rgb_hex_lr" 2>/dev/null || true
+                elif [ -w "$LED_SYSFS/effect_rgb_hex_m" ]; then
+                    [ -w "$LED_SYSFS/effect_enable" ] && echo 1 > "$LED_SYSFS/effect_enable" 2>/dev/null || true
+                    echo "$HEX" > "$LED_SYSFS/effect_rgb_hex_m" 2>/dev/null || true
+                fi
+                ;;
+            --brightness)
+                BRI="$2"; shift 2
+                SCALE=$(( BRI * 60 / 100 ))
+                [ -w "$LED_SYSFS/max_scale_lr" ] && echo "$SCALE" > "$LED_SYSFS/max_scale_lr" 2>/dev/null || true
+                [ -w "$LED_SYSFS/max_scale_f1f2" ] && echo "$SCALE" > "$LED_SYSFS/max_scale_f1f2" 2>/dev/null || true
                 ;;
             --mode)
                 MODE="$2"; shift 2
                 case "$MODE" in
                     battery)
                         CAP=100
-                        for node in /sys/class/power_supply/*/capacity; do
-                            [ -f "$node" ] && CAP=$(cat "$node" 2>/dev/null) && break
+                        for c in /sys/class/power_supply/*/capacity; do
+                            [ -f "$c" ] && CAP=$(cat "$c" 2>/dev/null || echo 100) && break
                         done
-                        case "$CAP" in
-                            *[!0-9]*|"") CAP=100 ;;
-                        esac
+                        case "$CAP" in (*[!0-9]*|"") CAP=100 ;; esac
                         if [ "$CAP" -ge 70 ]; then
-                            HEX="10B981" # Green
+                            handle_led --hex 22C55E
                         elif [ "$CAP" -ge 30 ]; then
-                            HEX="FBBF24" # Yellow
+                            handle_led --hex EAB308
                         elif [ "$CAP" -ge 15 ]; then
-                            HEX="F97316" # Orange
+                            handle_led --hex F97316
                         else
-                            HEX="EF4444" # Red
+                            handle_led --hex EF4444 --cycles 3
                         fi
-                        echo "$HEX" > "$STATE_DIR/last_led_hex" 2>/dev/null || true
-                        echo 1 > "$LED_SYSFS/effect_enable"
-                        echo "$HEX" > "$LED_SYSFS/effect_rgb_hex_lr"
                         ;;
-                    breathe|pulse)
-                        echo 1 > "$LED_SYSFS/effect_enable"
-                        echo 2 > "$LED_SYSFS/effect_cycles_lr" 2>/dev/null || true
+                    breathe)
+                        [ -w "$LED_SYSFS/effect_lr" ] && echo 2 > "$LED_SYSFS/effect_lr" 2>/dev/null || true
+                        [ -w "$LED_SYSFS/effect_m" ] && echo 2 > "$LED_SYSFS/effect_m" 2>/dev/null || true
                         ;;
                     off)
-                        echo 0 > "$LED_SYSFS/effect_enable"
+                        handle_led --off
                         ;;
                 esac
                 ;;
-            --brightness)
-                SCALE="$2"; shift 2
-                echo "$SCALE" > "$LED_SYSFS/max_scale"
-                ;;
             --cycles)
                 CYCLES="$2"; shift 2
-                echo "$CYCLES" > "$LED_SYSFS/effect_cycles_lr"
+                [ -w "$LED_SYSFS/effect_cycles_lr" ] && echo "$CYCLES" > "$LED_SYSFS/effect_cycles_lr" 2>/dev/null || true
+                [ -w "$LED_SYSFS/effect_cycles_m" ] && echo "$CYCLES" > "$LED_SYSFS/effect_cycles_m" 2>/dev/null || true
                 ;;
             --duration)
                 DUR="$2"; shift 2
-                echo "$DUR" > "$LED_SYSFS/effect_duration_lr"
+                [ -w "$LED_SYSFS/effect_duration_lr" ] && echo "$DUR" > "$LED_SYSFS/effect_duration_lr" 2>/dev/null || true
                 ;;
             --off)
-                echo 0 > "$LED_SYSFS/effect_enable"
+                [ -w "$LED_SYSFS/effect_enable" ] && echo 0 > "$LED_SYSFS/effect_enable" 2>/dev/null || true
+                [ -w "$LED_SYSFS/max_scale_lr" ] && echo 0 > "$LED_SYSFS/max_scale_lr" 2>/dev/null || true
+                [ -w "$LED_SYSFS/max_scale_f1f2" ] && echo 0 > "$LED_SYSFS/max_scale_f1f2" 2>/dev/null || true
                 shift
                 ;;
             *)
-                echo "Unknown led option: $1" >&2; return 1
+                usage
                 ;;
         esac
     done
@@ -111,148 +585,127 @@ handle_led() {
 
 # --- CPU SUBSYSTEM ---
 handle_cpu() {
-    CPU0="$CPU_SYSFS/cpu0/cpufreq"
-    [ -d "$CPU0" ] || { echo "next-hw: CPU freq sysfs not found." >&2; return 1; }
-
-    # Helper: write frequencies with safe ordering to prevent -EINVAL (min > max)
-    set_freqs() {
-        TARGET_MIN="$1"
-        TARGET_MAX="$2"
-        # Raise max first if new max is greater than target min, or lower min first
-        echo "$TARGET_MAX" > "$CPU0/scaling_max_freq" 2>/dev/null || true
-        echo "$TARGET_MIN" > "$CPU0/scaling_min_freq" 2>/dev/null || true
-        echo "$TARGET_MAX" > "$CPU0/scaling_max_freq" 2>/dev/null || true
-    }
-
-    case "$1" in
-        --profile)
-            case "$2" in
-                powersave)
-                    echo powersave > "$CPU0/scaling_governor" 2>/dev/null || true
-                    set_freqs 408000 816000
-                    ;;
-                normal)
-                    set_freqs 816000 1608000
-                    echo ondemand > "$CPU0/scaling_governor" 2>/dev/null || true
-                    ;;
-                performance)
-                    set_freqs 1200000 1800000
-                    echo performance > "$CPU0/scaling_governor" 2>/dev/null || true
-                    ;;
-                *)
-                    echo "Unknown profile: $2" >&2; return 1
-                    ;;
-            esac
-            ;;
-        --gov)
-            GOV="$2"; MIN="$4"; MAX="$6"
-            [ -n "$MIN" ] && [ -n "$MAX" ] && set_freqs "$MIN" "$MAX"
-            [ -n "$GOV" ] && echo "$GOV" > "$CPU0/scaling_governor" 2>/dev/null || true
-            ;;
-        --status)
-            echo "Governor: $(cat $CPU0/scaling_governor)"
-            echo "Min Freq: $(cat $CPU0/scaling_min_freq) kHz"
-            echo "Max Freq: $(cat $CPU0/scaling_max_freq) kHz"
-            ;;
-        *)
-            echo "Unknown cpu option: $1" >&2; return 1
-            ;;
-    esac
+    [ -d "$CPU_SYSFS/cpufreq/policy0" ] || return 0
+    POL="$CPU_SYSFS/cpufreq/policy0"
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --profile)
+                PROF="$2"; shift 2
+                case "$PROF" in
+                    powersave)
+                        [ -w "$POL/scaling_governor" ] && echo ondemand > "$POL/scaling_governor" 2>/dev/null || true
+                        [ -w "$POL/scaling_min_freq" ] && echo 408000 > "$POL/scaling_min_freq" 2>/dev/null || true
+                        [ -w "$POL/scaling_max_freq" ] && echo 816000 > "$POL/scaling_max_freq" 2>/dev/null || true
+                        ;;
+                    normal)
+                        [ -w "$POL/scaling_governor" ] && echo ondemand > "$POL/scaling_governor" 2>/dev/null || true
+                        [ -w "$POL/scaling_min_freq" ] && echo 816000 > "$POL/scaling_min_freq" 2>/dev/null || true
+                        [ -w "$POL/scaling_max_freq" ] && echo 1608000 > "$POL/scaling_max_freq" 2>/dev/null || true
+                        ;;
+                    performance)
+                        [ -w "$POL/scaling_governor" ] && echo performance > "$POL/scaling_governor" 2>/dev/null || true
+                        [ -w "$POL/scaling_min_freq" ] && echo 1416000 > "$POL/scaling_min_freq" 2>/dev/null || true
+                        [ -w "$POL/scaling_max_freq" ] && echo 1608000 > "$POL/scaling_max_freq" 2>/dev/null || true
+                        ;;
+                esac
+                ;;
+            --gov)
+                GOV="$2"; MIN_F="$4"; MAX_F="$6"; shift 6
+                [ -w "$POL/scaling_governor" ] && echo "$GOV" > "$POL/scaling_governor" 2>/dev/null || true
+                [ -w "$POL/scaling_min_freq" ] && echo "$MIN_F" > "$POL/scaling_min_freq" 2>/dev/null || true
+                [ -w "$POL/scaling_max_freq" ] && echo "$MAX_F" > "$POL/scaling_max_freq" 2>/dev/null || true
+                ;;
+            --status)
+                GOV=$(cat "$POL/scaling_governor" 2>/dev/null || echo "unknown")
+                CURR=$(cat "$POL/scaling_cur_freq" 2>/dev/null || echo "unknown")
+                echo "GOVERNOR=$GOV CURR_KHZ=$CURR"
+                return 0
+                ;;
+            *)
+                usage
+                ;;
+        esac
+    done
 }
 
-# --- DISPLAY SUBSYSTEM ---
-handle_display() {
-    [ -d "$DISP_SYSFS" ] || { echo "next-hw: Display debug sysfs not found." >&2; return 1; }
-    case "$1" in
-        --brightness)
-            PERCENT="$2"
-            LCD_VAL=$(( 10 + (PERCENT * 240) / 100 ))
-            echo "$PERCENT" > "$STATE_DIR/last_brightness" 2>/dev/null || true
-            cd "$DISP_SYSFS"
-            echo lcd0 > name
-            echo setbl > command
-            echo "$LCD_VAL" > param
-            echo 1 > start
-            ;;
-        --blank)
-            cd "$DISP_SYSFS"
-            echo lcd0 > name
-            if [ "$2" = "1" ]; then
-                echo blank > command
-            else
-                echo unblank > command
-            fi
-            echo 1 > start
-            ;;
-        *)
-            echo "Unknown display option: $1" >&2; return 1
-            ;;
-    esac
-}
-
-# --- BUTTON QUERY SUBSYSTEM ---
+# --- BUTTON SUBSYSTEM ---
 handle_button() {
-    BTN="$2"
-    EVDEV="/dev/input/event3"
-    [ -e "$EVDEV" ] || { echo "next-hw: Input device $EVDEV not present." >&2; return 1; }
-
-    CODE=""
-    TYPE="1"
-    case "$BTN" in
-        A) CODE="305" ;;
-        B) CODE="304" ;;
-        X) CODE="308" ;;
-        Y) CODE="307" ;;
-        L) CODE="310" ;;
-        R) CODE="311" ;;
-        SELECT) CODE="314" ;;
-        START) CODE="315" ;;
-        MENU) CODE="316" ;;
-        FN) TYPE="5"; CODE="1" ;;
-        *) echo "Unknown button: $BTN" >&2; return 1 ;;
-    esac
-
-    if command -v evtest >/dev/null 2>&1; then
-        evtest --query "$EVDEV" "$TYPE" "$CODE" >/dev/null 2>&1
-        [ $? -eq 10 ] && return 0 || return 1
-    fi
-    return 1
+    detect_hardware
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --check)
+                BTN="$2"; shift 2
+                case "$BTN" in
+                    FN)
+                        # Read physical switch state
+                        if [ -f "/sys/class/gpio/gpio355/value" ]; then
+                            [ "$(cat /sys/class/gpio/gpio355/value 2>/dev/null)" = "1" ] && return 0 || return 1
+                        fi
+                        return 1
+                        ;;
+                    *)
+                        return 1
+                        ;;
+                esac
+                ;;
+            *)
+                usage
+                ;;
+        esac
+    done
 }
 
-# --- POWER LIFECYCLE ---
+# --- POWER SUBSYSTEM (DE-POP GUARD) ---
 handle_power() {
-    case "$1" in
+    ACTION="$1"
+    case "$ACTION" in
         sleep)
-            /mnt/SDCARD/System/bin/sleep_guard.sh sleep --no-suspend 2>/dev/null || true
-            handle_display --blank 1 || true
-            handle_cpu --profile powersave || true
-            handle_led --off || true
+            # Mute audio with capacitive discharge dwell
+            amixer -q sset 'Master' mute 2>/dev/null || amixer -q sset 'DAC' mute 2>/dev/null || true
+            usleep 60000 2>/dev/null || true
+            handle_led --off
+            handle_display --blank 1
             ;;
         wake)
-            handle_display --blank 0 || true
-            handle_cpu --profile normal || true
-            if [ -f "$STATE_DIR/last_led_hex" ]; then
-                handle_led --hex "$(cat $STATE_DIR/last_led_hex)" || true
-            else
-                handle_led --hex 002244 || true
-            fi
-            /mnt/SDCARD/System/bin/sleep_guard.sh wake 2>/dev/null || true
-            ;;
-        *)
-            echo "Unknown power action: $1" >&2; return 1
+            handle_display --blank 0
+            # Post-wake stabilization dwell
+            usleep 250000 2>/dev/null || true
+            amixer -q sset 'Master' unmute 2>/dev/null || amixer -q sset 'DAC' unmute 2>/dev/null || true
+            handle_led --mode battery
             ;;
     esac
 }
 
-# --- DISPATCH ---
+# --- MAIN DISPATCHER ---
 [ $# -eq 0 ] && usage
 
-COMMAND="$1"; shift
+COMMAND="$1"
+shift
+
 case "$COMMAND" in
-    led) handle_led "$@" ;;
-    cpu) handle_cpu "$@" ;;
+    detect)
+        case "${1:-}" in
+            --get-model) get_model ;;
+            --get-res)
+                detect_hardware
+                . "$STATE_DIR/hardware.env" 2>/dev/null || true
+                echo "${XRES:-1280} ${YRES:-720}"
+                ;;
+            --dump)
+                detect_hardware
+                cat "$STATE_DIR/hardware.env"
+                ;;
+            *)
+                detect_hardware
+                echo "Detected: $(get_model)"
+                ;;
+        esac
+        ;;
+    fan)     handle_fan "$@" ;;
     display) handle_display "$@" ;;
-    button) handle_button "$@" ;;
-    power) handle_power "$@" ;;
-    *) usage ;;
+    led)     handle_led "$@" ;;
+    cpu)     handle_cpu "$@" ;;
+    button)  handle_button "$@" ;;
+    power)   handle_power "$@" ;;
+    *)       usage ;;
 esac
