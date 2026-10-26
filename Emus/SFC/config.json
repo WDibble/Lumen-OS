@@ -1,7 +1,6 @@
 {
   "label": "SNES / Super Famicom",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "818CF8",
   "launch": "launch.sh",
   "rompath": "../../Roms/SFC",

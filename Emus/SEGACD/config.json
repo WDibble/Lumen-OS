@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "ic-SCD-small.png",
   "iconlist": "ic-SCD-list.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/SEGACD.png",
   "themecolor": "FFFF88",
   "launch": "launch.sh",
   "rompath": "../../Roms/SEGACD",

@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "80.png",
   "iconlist": "32.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/JAVA.png",
   "themecolor": "CD6155",
   "launch": "launch.sh",
   "rompath": "../../Roms/JAVA",

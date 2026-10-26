@@ -1,7 +1,6 @@
 {
   "label": "N. FDS",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/FDS.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/FDS",

@@ -1,7 +1,6 @@
 {
   "label": "PC Engine / TurboGrafx-16",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "EC4899",
   "launch": "launch.sh",
   "rompath": "../../Roms/PCE",

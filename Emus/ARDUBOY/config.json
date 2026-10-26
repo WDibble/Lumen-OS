@@ -1,7 +1,6 @@
 {
   "label": "ARDUBOY",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/ARDUBOY.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/ARDUBOY",

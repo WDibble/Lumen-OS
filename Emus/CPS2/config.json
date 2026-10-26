@@ -1,7 +1,6 @@
 {
   "label": "Capcom Play System 2",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "2563EB",
   "launch": "launch.sh",
   "rompath": "../../Roms/CPS2",

@@ -1,7 +1,6 @@
 {
   "label": "SEGA SG-1000",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/SG1000.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/SG1000",

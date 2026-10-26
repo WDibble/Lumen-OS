@@ -1,7 +1,6 @@
 {
   "label": "SCUMMVM",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/SCUMMVM.png",
   "themecolor": "00D300",
   "launch": "launch.sh",
   "rompath": "../../Roms/SCUMMVM",

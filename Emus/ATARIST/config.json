@@ -1,7 +1,6 @@
 {
   "label": "ATARIST",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/ATARIST.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/ATARIST",

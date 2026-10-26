@@ -8,7 +8,6 @@
   "shortname": 0,
   "hidebios": 1,
   "extlist": "daphne",
-  "background": "/mnt/SDCARD/Backgrounds/Default/DAPHNE.png",
   "launchlist": [
     {
       "name": "--------------  libretro  --------------",

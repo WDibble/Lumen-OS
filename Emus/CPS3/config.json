@@ -1,7 +1,6 @@
 {
   "label": "Capcom Play System 3",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "D97706",
   "launch": "launch.sh",
   "rompath": "../../Roms/CPS3",

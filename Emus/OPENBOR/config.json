@@ -1,7 +1,6 @@
 {
   "label": "OpenBOR",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/OPENBOR.png",
   "iconsmall": "ic-openbor.png",
   "iconlist": "ic-openbor.png",
   "launch": "launch.sh",

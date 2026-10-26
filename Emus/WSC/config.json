@@ -1,7 +1,6 @@
 {
   "label": "WonderSwan Color",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "A855F7",
   "launch": "launch.sh",
   "rompath": "../../Roms/WSC",

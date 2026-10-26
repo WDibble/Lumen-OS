@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "",
   "iconlist": "",
-  "background": "/mnt/SDCARD/Backgrounds/Default/SFCMSU.png",
   "themecolor": "FF0000",
   "launch": "launch.sh",
   "rompath": "../../Roms/SFCMSU",

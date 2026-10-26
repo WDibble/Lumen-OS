@@ -1,7 +1,6 @@
 {
   "label": "SEGA 32X",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/SEGA32X.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/SEGA32X",

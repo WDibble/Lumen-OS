@@ -8,7 +8,6 @@
   "shortname": 0,
   "hidebios": 1,
   "extlist": "png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/_BootLogo.png",
   "launchlist": [
     {
       "name": "Default",

@@ -1,7 +1,6 @@
 {
   "label": "AMIGA CD32",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/AMIGACD.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/AMIGACD",

@@ -1,7 +1,6 @@
 {
   "label": "Sega Game Gear",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "F97316",
   "launch": "launch.sh",
   "rompath": "../../Roms/GG",

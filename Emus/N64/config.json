@@ -1,7 +1,6 @@
 {
   "label": "Nintendo 64",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "38BDF8",
   "launch": "launch.sh",
   "rompath": "../../Roms/N64",

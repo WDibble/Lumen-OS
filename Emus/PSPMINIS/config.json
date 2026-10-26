@@ -2,7 +2,6 @@
   "label": "PSPMINIS",
   "icon": "icon.png",
   "launch": "launch.sh",
-  "background": "/mnt/SDCARD/Backgrounds/Default/PSPMINIS.png",
   "themecolor": "64A8BD",
   "iconsel": "",
   "rompath": "../../Roms/PSPMINIS",

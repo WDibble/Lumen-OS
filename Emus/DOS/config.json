@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "ic-dos-small.png",
   "iconlist": "ic-dos-list.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/DOS.png",
   "themecolor": "FFFF88",
   "launch": "launch.sh",
   "rompath": "../../Roms/DOS",

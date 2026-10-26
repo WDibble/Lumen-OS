@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "",
   "iconlist": "",
-  "background": "/mnt/SDCARD/Backgrounds/Default/PORTS.png",
   "themecolor": "61A8DD",
   "launch": "launch.sh",
   "rompath": "../../Roms/PORTS",

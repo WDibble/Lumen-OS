@@ -1,7 +1,6 @@
 {
   "label": "THOMSON",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/THOMSON.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/THOMSON",

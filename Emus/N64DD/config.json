@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "ic-n64-80-n.png",
   "iconlist": "ic-n64-32-n.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/N64DD.png",
   "themecolor": "FFFF88",
   "launch": "launch.sh",
   "rompath": "../../Roms/N64DD",

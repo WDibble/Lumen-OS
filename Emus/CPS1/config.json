@@ -1,7 +1,6 @@
 {
   "label": "Capcom Play System 1",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "E11D48",
   "launch": "launch.sh",
   "rompath": "../../Roms/CPS1",

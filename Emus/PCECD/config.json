@@ -1,7 +1,6 @@
 {
   "label": "PCE CD",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/PCECD.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/PCECD",

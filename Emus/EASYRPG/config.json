@@ -2,7 +2,6 @@
   "label": "EASYRPG",
   "icon": "icon.png",
   "iconsel": "",
-  "background": "/mnt/SDCARD/Backgrounds/Default/EASYRPG.png",
   "launch": "launch.sh",
   "rompath": "../../Roms/EASYRPG",
   "imgpath": "../../Imgs/EASYRPG",

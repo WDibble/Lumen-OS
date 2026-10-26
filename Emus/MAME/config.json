@@ -1,7 +1,6 @@
 {
   "label": "MAME (Arcade)",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "64748B",
   "launch": "launch.sh",
   "rompath": "../../Roms/MAME",

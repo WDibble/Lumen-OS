@@ -1,7 +1,6 @@
 {
   "label": "SNK Neo Geo",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "EAB308",
   "launch": "launch.sh",
   "rompath": "../../Roms/NEOGEO",

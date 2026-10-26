@@ -1,7 +1,6 @@
 {
   "label": "FinalBurn Neo (Arcade)",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "14B8A6",
   "launch": "launch.sh",
   "rompath": "../../Roms/FBNEO",

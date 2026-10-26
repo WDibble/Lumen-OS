@@ -1,7 +1,6 @@
 {
   "label": "WS",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/WS.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/WS",

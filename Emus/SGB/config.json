@@ -1,7 +1,6 @@
 {
   "label": "N. SUPER GB",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/SGB.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/SGB",

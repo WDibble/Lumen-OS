@@ -1,7 +1,6 @@
 {
   "label": "Sega Mega Drive / Genesis",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "0284C7",
   "launch": "launch.sh",
   "rompath": "../../Roms/MD",

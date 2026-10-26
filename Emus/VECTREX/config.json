@@ -1,7 +1,6 @@
 {
   "label": "VECTREX",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/VECTREX.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/VECTREX",

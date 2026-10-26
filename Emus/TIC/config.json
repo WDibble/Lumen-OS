@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "ic-TIC-small.png",
   "iconlist": "ic-TIC-list.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/TIC.png",
   "themecolor": "FFFF88",
   "launch": "launch.sh",
   "rompath": "../../Roms/TIC",

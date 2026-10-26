@@ -1,7 +1,6 @@
 {
   "label": "Sony PlayStation Portable",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "38BDF8",
   "launch": "launch.sh",
   "rompath": "../../Roms/PSP",

@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "",
   "iconlist": "",
-  "background": "/mnt/SDCARD/Backgrounds/Default/MDMSU.png",
   "themecolor": "0088CF",
   "launch": "launch.sh",
   "rompath": "../../Roms/MDMSU",

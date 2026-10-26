@@ -1,7 +1,6 @@
 {
   "label": "Sony PlayStation",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "60A5FA",
   "launch": "launch.sh",
   "rompath": "../../Roms/PS",

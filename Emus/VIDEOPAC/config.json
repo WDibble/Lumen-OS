@@ -1,7 +1,6 @@
 {
   "label": "VIDEOPAC",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/VIDEOPAC.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/VIDEOPAC",

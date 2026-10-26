@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "ic-LYNX-small.png",
   "iconlist": "ic-LYNX-list.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/LYNX.png",
   "themecolor": "FFFF88",
   "launch": "launch.sh",
   "rompath": "../../Roms/LYNX",

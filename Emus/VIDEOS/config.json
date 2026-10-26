@@ -2,7 +2,6 @@
   "label": "\u00a0VIDEOS",
   "label.ch.lang": "\u00a0\u89c6\u9891",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/VIDEOS.png",
   "themecolor": "DDEEFF",
   "launch": "launch.sh",
   "rompath": "../../Roms/VIDEOS",

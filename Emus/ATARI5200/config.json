@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "",
   "iconlist": "",
-  "background": "/mnt/SDCARD/Backgrounds/Default/ATARI5200.png",
   "themecolor": "A569BD",
   "launch": "launch.sh",
   "rompath": "../../Roms/ATARI5200",

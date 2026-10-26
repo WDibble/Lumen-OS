@@ -1,7 +1,6 @@
 {
   "label": "Game Boy",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "A3E635",
   "launch": "launch.sh",
   "rompath": "../../Roms/GB",

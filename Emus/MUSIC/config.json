@@ -2,7 +2,6 @@
   "label": "\u00a0MUSIC",
   "label.ch.lang": "\u00a0\u97f3\u4e50",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/MUSIC.png",
   "themecolor": "DDEEFF",
   "launch": "launch.sh",
   "rompath": "../../Roms/MUSIC",

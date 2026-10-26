@@ -1,7 +1,6 @@
 {
   "label": "NES / Famicom",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "EF4444",
   "launch": "launch.sh",
   "rompath": "../../Roms/FC",

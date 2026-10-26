@@ -3,7 +3,6 @@
   "icon": "icon.png",
   "iconsmall": "ic-NEOCD-small.png",
   "iconlist": "ic-NEOCD-list.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/NEOCD.png",
   "themecolor": "FFFF88",
   "launch": "launch.sh",
   "rompath": "../../Roms/NEOCD",

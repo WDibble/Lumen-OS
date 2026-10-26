@@ -1,7 +1,6 @@
 {
   "label": "PICO-8",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "F43F5E",
   "launch": "launch.sh",
   "rompath": "../../Roms/PICO",

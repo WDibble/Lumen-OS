@@ -1,7 +1,6 @@
 {
   "label": "Nintendo DS",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "38BDF8",
   "launch": "launch.sh",
   "rompath": "../../Roms/NDS",

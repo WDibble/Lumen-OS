@@ -1,7 +1,6 @@
 {
   "label": "LUTRO",
   "icon": "icon.png",
-  "background": "/mnt/SDCARD/Backgrounds/Default/LUTRO.png",
   "iconsel": "",
   "launch": "launch.sh",
   "rompath": "../../Roms/LUTRO",

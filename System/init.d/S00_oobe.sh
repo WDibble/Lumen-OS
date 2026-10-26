@@ -49,6 +49,15 @@ if [ -x "$HW_TOOL" ]; then
     "$HW_TOOL" led --hex 38BDF8 --cycles 2 2>/dev/null || true
 fi
 
+# 3.5 Auto-apply Lumen Theme to MainUI
+if [ -x "/usr/trimui/bin/systemval" ]; then
+    CURRENT_THEME=$(/usr/trimui/bin/systemval theme 2>/dev/null || true)
+    if [ "$CURRENT_THEME" != "/mnt/SDCARD/Themes/Lumen" ]; then
+        echo "[OOBE] Activating Lumen theme in MainUI..."
+        /usr/trimui/bin/systemval theme "/mnt/SDCARD/Themes/Lumen" 2>/dev/null || true
+    fi
+fi
+
 # 4. Atomic Initialization Commit
 TMP_FLAG="$SD_ROOT/.lumen_initialized.tmp"
 cat <<EOF > "$TMP_FLAG"

@@ -1,7 +1,6 @@
 {
   "label": "Atari 2600",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "CA8A04",
   "launch": "launch.sh",
   "rompath": "../../Roms/ATARI2600",

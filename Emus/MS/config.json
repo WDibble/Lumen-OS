@@ -1,7 +1,6 @@
 {
   "label": "Sega Master System",
   "icon": "icon.png",
-  "background": "bg.png",
   "themecolor": "06B6D4",
   "launch": "launch.sh",
   "rompath": "../../Roms/MS",

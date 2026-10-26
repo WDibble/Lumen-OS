@@ -8,7 +8,6 @@
   "shortname": 1,
   "hidebios": 1,
   "extlist": "sh",
-  "background": "/mnt/SDCARD/Backgrounds/Default/_SystemTools.png",
   "launchlist": [
     {
       "name": "Default",
