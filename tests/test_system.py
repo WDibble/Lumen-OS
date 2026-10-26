@@ -944,5 +944,130 @@ class TestLumenNext(unittest.TestCase):
             # Emergency ceiling override (>75C -> 255)
             self.assertIn("255", t)
 
+    def test_35_audio_auto_routing_and_depop(self):
+        """Verify ra_audio_switcher.sh USB DAC, BT ALSA, OSS routing and next-hw power sleep/wake."""
+        switcher = f"{REPO_ROOT}/System/usr/trimui/scripts/ra_audio_switcher.sh"
+        next_hw = f"{REPO_ROOT}/System/bin/next-hw"
+        launch_sh = f"{REPO_ROOT}/System/scripts/launch.sh"
+
+        self.assertTrue(os.path.isfile(switcher) and os.access(switcher, os.X_OK))
+        with open(switcher) as f:
+            t = f.read()
+            self.assertIn("USB_CARD=", t)
+            self.assertIn("audio_driver", t)
+            self.assertIn("audio_device", t)
+
+        with open(launch_sh) as f:
+            t = f.read()
+            self.assertIn("ra_audio_switcher.sh", t)
+
+        with open(next_hw) as f:
+            t = f.read()
+            self.assertIn("USB_CARD=", t)
+            self.assertIn("-c \"$USB_CARD\"", t)
+
+    def test_36_standalone_ppsspp_and_mute_fix(self):
+        """Verify Apps/PPSSPP config, launcher, watchdog, and ppsspp.ini mute bug fixes."""
+        app_cfg = f"{REPO_ROOT}/Apps/PPSSPP/config.json"
+        app_launch = f"{REPO_ROOT}/Apps/PPSSPP/launch.sh"
+        emu_launch = f"{REPO_ROOT}/Emus/PSP/launch.sh"
+
+        self.assertTrue(os.path.isfile(app_cfg))
+        self.assertTrue(os.path.isfile(app_launch) and os.access(app_launch, os.X_OK))
+
+        with open(app_cfg) as f:
+            cfg = json.load(f)
+            self.assertEqual(cfg.get("label"), "PPSSPP")
+            self.assertEqual(cfg.get("useswap"), 1)
+
+        with open(app_launch) as f:
+            t = f.read()
+            self.assertIn("GraphicsBackend = 0", t)
+            self.assertIn("GlobalVolume = 10", t)
+            self.assertIn("AudioMuted = False", t)
+            self.assertIn("fbset -g 1280 720", t)
+
+        with open(emu_launch) as f:
+            t = f.read()
+            self.assertIn("GlobalVolume = 10", t)
+            self.assertIn("AudioMuted = False", t)
+
+    def test_37_portmaster_runtime_libraries(self):
+        """Verify presence and ELF headers of the 6 PortMaster runtime libraries."""
+        lib_dir = f"{REPO_ROOT}/System/lib"
+        required_libs = [
+            "libfontconfig.so.1",
+            "liblove-11.5.so",
+            "libluajit-5.1.so.2",
+            "libmodplug.so.1",
+            "libogg.so.0",
+            "libtheoradec.so.1"
+        ]
+        for lib in required_libs:
+            lpath = os.path.join(lib_dir, lib)
+            self.assertTrue(os.path.isfile(lpath), f"Missing PortMaster runtime library: {lib}")
+            with open(lpath, "rb") as f:
+                header = f.read(4)
+                self.assertEqual(header, b"\x7fELF", f"Library {lib} is not an ELF binary")
+
+    def test_38_starttab_fw110_schema(self):
+        """Verify starttab_switcher.sh generates valid two-element array and clamps indices."""
+        switcher = f"{REPO_ROOT}/System/usr/trimui/scripts/starttab_switcher.sh"
+        self.assertTrue(os.path.isfile(switcher) and os.access(switcher, os.X_OK))
+
+        # Test tab 2
+        subprocess.run([switcher, "2"], check=True)
+        with open("/tmp/state.json") as f:
+            data = json.load(f)
+            self.assertEqual(len(data), 2)
+            self.assertEqual(data[0], {"type": 48, "index": 0})
+            self.assertEqual(data[1], {"type": 0, "index": 2})
+
+        # Test clamp upper bound
+        subprocess.run([switcher, "99"], check=True)
+        with open("/tmp/state.json") as f:
+            data = json.load(f)
+            self.assertEqual(data[1]["index"], 4)
+
+    def test_39_graceful_kill_apps(self):
+        """Verify kill_apps.sh script syntax, zombie detection logic, and timeout bounds."""
+        kill_script = f"{REPO_ROOT}/System/usr/trimui/bin/kill_apps.sh"
+        self.assertTrue(os.path.isfile(kill_script) and os.access(kill_script, os.X_OK))
+        with open(kill_script) as f:
+            t = f.read()
+            self.assertIn("/proc/$pid/status", t)
+            self.assertIn('"Z"', t)
+            self.assertIn("MAX_ITER=30", t)
+            self.assertIn("kill -TERM", t)
+            self.assertIn("kill -KILL", t)
+
+    def test_40_pcsx_rearmed_hires_modes(self):
+        """Verify Emus/PS config.json launchlist and pcsx.sh neon enhancement options."""
+        ps_cfg = f"{REPO_ROOT}/Emus/PS/config.json"
+        ps_pcsx = f"{REPO_ROOT}/Emus/PS/pcsx.sh"
+
+        self.assertTrue(os.path.isfile(ps_cfg))
+        self.assertTrue(os.path.isfile(ps_pcsx) and os.access(ps_pcsx, os.X_OK))
+
+        with open(ps_cfg) as f:
+            cfg = json.load(f)
+            names = [entry["name"] for entry in cfg.get("launchlist", [])]
+            self.assertIn("HiRes Mode (Enhanced Resolution)", names)
+            self.assertIn("HiRes + Speedhack", names)
+
+        with open(ps_pcsx) as f:
+            t = f.read()
+            self.assertIn("pcsx_rearmed_neon_enhancement_enable", t)
+            self.assertIn("pcsx_rearmed_neon_enhancement_no_main", t)
+
+    def test_41_orphaned_cover_art_removal(self):
+        """Verify Orphaned Cover Art Removal utility quarantine behavior and bracket literal handling."""
+        tool = f"{REPO_ROOT}/Apps/SystemTools/Menu/TOOLS/Orphaned Cover Art Removal.sh"
+        self.assertTrue(os.path.isfile(tool) and os.access(tool, os.X_OK))
+        with open(tool) as f:
+            t = f.read()
+            self.assertIn(".trash/Imgs", t)
+            self.assertIn("grep -F -x -q", t)
+
 if __name__ == "__main__":
     unittest.main()

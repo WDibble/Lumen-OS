@@ -127,6 +127,12 @@ if [ -x "$HW_TOOL" ]; then
     "$HW_TOOL" led --hex 38BDF8 2>/dev/null || true
 fi
 
+# 6.5 Audio Output Auto-Routing (USB DAC / Bluetooth / OSS)
+AUDIO_SWITCHER="/mnt/SDCARD/System/usr/trimui/scripts/ra_audio_switcher.sh"
+if [ -x "$AUDIO_SWITCHER" ]; then
+    sh "$AUDIO_SWITCHER" >> "$LOG_FILE" 2>&1 || true
+fi
+
 # 7. Execute Target Runner
 if [ -n "$TARGET_PARAM" ] && [ -x "$TARGET_PARAM" ]; then
     # Standalone executable binary (e.g. PPSSPP, Drastic, Mupen64plus, Flycast)

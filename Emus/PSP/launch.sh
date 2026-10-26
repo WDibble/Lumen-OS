@@ -26,6 +26,19 @@ CONFIG_FILE="$EMU_DIR/.config/ppsspp/PSP/SYSTEM/ppsspp.ini"
 
 mkdir -p "$EMU_DIR/.config/ppsspp/PSP/SYSTEM"
 
+# Sanitize CRLF and remediate mute bug
+if [ -f "$CONFIG_FILE" ]; then
+    sed -i 's/\r$//' "$CONFIG_FILE" 2>/dev/null || true
+    if grep -q '^\[Sound\]' "$CONFIG_FILE"; then
+        sed -i '/^\[Sound\]$/,/^\[/ s/GlobalVolume = .*/GlobalVolume = 10/' "$CONFIG_FILE" 2>/dev/null || true
+        sed -i '/^\[Sound\]$/,/^\[/ s/AudioMuted = .*/AudioMuted = False/' "$CONFIG_FILE" 2>/dev/null || true
+    fi
+    if grep -q '^\[Audio\]' "$CONFIG_FILE"; then
+        sed -i '/^\[Audio\]$/,/^\[/ s/GlobalVolume = .*/GlobalVolume = 10/' "$CONFIG_FILE" 2>/dev/null || true
+        sed -i '/^\[Audio\]$/,/^\[/ s/AudioMuted = .*/AudioMuted = False/' "$CONFIG_FILE" 2>/dev/null || true
+    fi
+fi
+
 if [ "$MODE" = "vulkan" ]; then
     # Set backend to Vulkan
     [ -f "$CONFIG_FILE" ] && sed -i '/^\[Graphics\]$/,/^\[/ s/GraphicsBackend = .*/GraphicsBackend = 3/' "$CONFIG_FILE" 2>/dev/null || true

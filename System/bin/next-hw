@@ -658,10 +658,23 @@ handle_button() {
 # --- POWER SUBSYSTEM (DE-POP GUARD) ---
 handle_power() {
     ACTION="$1"
+    USB_CARD=$(awk '
+        /^[[:space:]]*[1-9]/ {
+            line = tolower($0)
+            if (line ~ /(usb|dac|headset|audio)/ && line !~ /(audiocodec|sndhdmi)/) {
+                print $1
+                exit
+            }
+        }
+    ' /proc/asound/cards 2>/dev/null || true)
+
     case "$ACTION" in
         sleep)
             # Mute audio with capacitive discharge dwell
             amixer -q sset 'Master' mute 2>/dev/null || amixer -q sset 'DAC' mute 2>/dev/null || true
+            if [ -n "$USB_CARD" ]; then
+                amixer -q -c "$USB_CARD" sset 'Master' mute 2>/dev/null || amixer -q -c "$USB_CARD" sset 'PCM' mute 2>/dev/null || true
+            fi
             usleep 60000 2>/dev/null || true
             handle_led --off
             handle_display --blank 1
@@ -671,6 +684,9 @@ handle_power() {
             # Post-wake stabilization dwell
             usleep 250000 2>/dev/null || true
             amixer -q sset 'Master' unmute 2>/dev/null || amixer -q sset 'DAC' unmute 2>/dev/null || true
+            if [ -n "$USB_CARD" ]; then
+                amixer -q -c "$USB_CARD" sset 'Master' unmute 2>/dev/null || amixer -q -c "$USB_CARD" sset 'PCM' unmute 2>/dev/null || true
+            fi
             handle_led --mode battery
             ;;
     esac
