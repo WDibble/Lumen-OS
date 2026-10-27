@@ -14,4 +14,8 @@ if [ -e "/dev/input/event3" ]; then
     fi
 fi
 
-exec /mnt/SDCARD/Apps/LumenLauncher/launch.sh
+# Permanent supervisor loop ensuring Lumen OS shell never yields to stock MainUI
+while true; do
+    /mnt/SDCARD/Apps/LumenLauncher/launch.sh
+    sleep 1
+done

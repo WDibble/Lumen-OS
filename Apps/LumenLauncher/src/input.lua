@@ -1,9 +1,9 @@
 local input = {
-    repeat_delay = 0.45,
-    repeat_rate  = 0.14,
-    active_dir   = nil,
-    timer        = 0,
-    deadzone     = 0.45,
+    repeat_delay   = 0.45,
+    repeat_rate    = 0.14,
+    active_dir     = nil,
+    timer          = 0,
+    deadzone       = 0.45,
     axis_latched_x = false,
     axis_latched_y = false
 }
@@ -17,38 +17,44 @@ local KEY_MAP = {
     space      = "CONFIRM",
     escape     = "BACK",
     backspace  = "BACK",
+    a          = "CONFIRM",
+    b          = "BACK",
     x          = "SECONDARY",
     y          = "MENU",
-    tab        = "SELECT",
-    lshift     = "L1",
-    rshift     = "R1"
+    q          = "PREV_TAB",
+    e          = "NEXT_TAB",
+    lshift     = "PREV_TAB",
+    rshift     = "NEXT_TAB",
+    ["1"]      = "TAB_1",
+    ["2"]      = "TAB_2",
+    ["3"]      = "TAB_3",
+    ["4"]      = "TAB_4"
 }
 
--- TrimUI Nintendo layout: Physical A is right (b), Physical B is bottom (a), Physical X is top (y), Physical Y is left (x)
+-- Physical Nintendo layout
 local BUTTON_MAP = {
     dpleft        = "LEFT",
     dpright       = "RIGHT",
     dpup          = "UP",
     dpdown        = "DOWN",
-    a             = "BACK",       -- Physical B (bottom)
-    b             = "CONFIRM",    -- Physical A (right)
-    x             = "MENU",       -- Physical Y (left)
-    y             = "SECONDARY",  -- Physical X (top)
-    leftshoulder  = "L1",
-    rightshoulder = "R1",
+    a             = "BACK",
+    b             = "CONFIRM",
+    x             = "MENU",
+    y             = "SECONDARY",
+    leftshoulder  = "PREV_TAB",
+    rightshoulder = "NEXT_TAB",
     start         = "START",
     back          = "SELECT",
     guide         = "MENU"
 }
 
--- Raw joystick fallback map for handhelds when SDL gamepad is not auto-assigned
 local RAW_BUTTON_MAP = {
-    [1]  = "BACK",      -- Physical B
-    [2]  = "CONFIRM",   -- Physical A
-    [3]  = "MENU",      -- Physical Y
-    [4]  = "SECONDARY", -- Physical X
-    [5]  = "L1",
-    [6]  = "R1",
+    [1]  = "BACK",
+    [2]  = "CONFIRM",
+    [3]  = "MENU",
+    [4]  = "SECONDARY",
+    [5]  = "PREV_TAB",
+    [6]  = "NEXT_TAB",
     [7]  = "SELECT",
     [8]  = "START",
     [9]  = "MENU",
@@ -56,13 +62,6 @@ local RAW_BUTTON_MAP = {
     [12] = "DOWN",
     [13] = "LEFT",
     [14] = "RIGHT"
-}
-
-local HAT_MAP = {
-    u = "UP",
-    d = "DOWN",
-    l = "LEFT",
-    r = "RIGHT"
 }
 
 function input.init()
@@ -87,7 +86,6 @@ end
 
 function input.handle_press(action, on_action)
     if not action then return end
-
     if action == "LEFT" or action == "RIGHT" or action == "UP" or action == "DOWN" then
         input.active_dir = action
         input.timer = 0
@@ -133,7 +131,6 @@ function input.gamepadreleased(joystick, button)
 end
 
 function input.joystickpressed(joystick, button, on_action)
-    -- Only handle raw joystick if not already handled as gamepad
     if joystick and joystick:isGamepad() then return end
     local mapped = RAW_BUTTON_MAP[button]
     if mapped then
@@ -149,20 +146,8 @@ function input.joystickreleased(joystick, button)
     end
 end
 
-function input.joystickhat(joystick, hat, direction, on_action)
-    if joystick and joystick:isGamepad() then return end
-    local mapped = HAT_MAP[direction]
-    if mapped then
-        input.handle_press(mapped, on_action)
-    elseif direction == "c" then
-        if input.active_dir then
-            input.handle_release(input.active_dir)
-        end
-    end
-end
-
 function input.joystickaxis(joystick, axis, value, on_action)
-    if axis == 1 then -- Left Stick X
+    if axis == 1 then
         if value < -input.deadzone then
             if not input.axis_latched_x then
                 input.axis_latched_x = true
@@ -181,7 +166,7 @@ function input.joystickaxis(joystick, axis, value, on_action)
                 end
             end
         end
-    elseif axis == 2 then -- Left Stick Y
+    elseif axis == 2 then
         if value < -input.deadzone then
             if not input.axis_latched_y then
                 input.axis_latched_y = true

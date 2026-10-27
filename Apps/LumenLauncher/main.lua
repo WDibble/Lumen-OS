@@ -1,137 +1,245 @@
 local theme      = require("src.theme")
 local audio      = require("src.audio")
 local input      = require("src.input")
-local roms       = require("src.roms")
+local catalog    = require("src.catalog")
 local state      = require("src.state")
 local dispatcher = require("src.dispatcher")
 
 local status_bar    = require("src.views.status_bar")
+local tab_bar       = require("src.views.tab_bar")
 local carousel      = require("src.views.carousel")
 local two_pane      = require("src.views.two_pane")
+local settings_view = require("src.views.settings_view")
+local launch_view   = require("src.views.launch_view")
 local hint_bar      = require("src.views.hint_bar")
-local options_modal = require("src.views.options_modal")
-local search_modal  = require("src.views.search_modal")
 
-local systems = {}
+local systems   = {}
+local apps      = {}
+local favorites = {}
+local settings  = {}
 local panic_error = nil
-local last_action = "NONE"
-local last_event = "NONE"
+
+local function get_active_tab_items()
+    if state.current_tab == state.TAB_CONSOLES then
+        return systems
+    elseif state.current_tab == state.TAB_APPS then
+        return apps
+    elseif state.current_tab == state.TAB_FAVORITES then
+        return favorites
+    elseif state.current_tab == state.TAB_SETTINGS then
+        return settings
+    end
+    return systems
+end
+
+local function update_active_accent()
+    if state.active_view == state.VIEW_CAROUSEL then
+        local items = get_active_tab_items()
+        local idx = state.carousel_indices[state.current_tab] or 1
+        local item = items[idx]
+        if item and item.color then
+            theme.set_accent(item.color)
+            state.active_accent = item.color
+        end
+    elseif state.active_view == state.VIEW_GAMES then
+        local sys_idx = state.carousel_indices[state.TAB_CONSOLES] or 1
+        local cur_sys = systems[sys_idx]
+        if cur_sys and cur_sys.color then
+            theme.set_accent(cur_sys.color)
+            state.active_accent = cur_sys.color
+        end
+    elseif state.active_view == state.VIEW_SETTINGS then
+        local accent_setting = settings[1]
+        if accent_setting and accent_setting.values then
+            local col = accent_setting.values[accent_setting.selected]
+            if col then
+                theme.set_accent(col)
+                state.active_accent = col
+            end
+        end
+    end
+end
 
 function love.load()
     audio.init()
     theme.init_fonts()
     input.init()
-    systems = roms.load_all()
+
+    systems   = catalog.load_systems()
+    apps      = catalog.APPS
+    favorites = catalog.FAVORITES
+    settings  = catalog.SETTINGS
+
     state.init(#systems)
+    theme.set_accent(state.active_accent)
+    update_active_accent()
 end
 
 local function on_action(action)
-    last_action = action
     audio.play_click()
 
-    -- 1. Modals have top-level focus
-    if state.mode == state.MODE_OPTIONS then
-        options_modal.handle_action(
-            action,
-            function()
-                state.mode = state.prev_mode or state.MODE_CAROUSEL
-                state.save()
-            end,
-            function()
-                love.event.quit(0)
-                os.execute("killall -9 love.aarch64 2>/dev/null; /usr/trimui/bin/MainUI &")
-            end
-        )
+    -- 1. Global Tab Switching via L1 / R1 / Q / E / 1-4
+    if action == "PREV_TAB" then
+        state.cycle_tab(-1)
+        update_active_accent()
         return
-    elseif state.mode == state.MODE_SEARCH then
-        local current_sys = systems[state.system_index]
-        search_modal.handle_action(
-            action,
-            function(letter)
-                if state.prev_mode == state.MODE_CAROUSEL then
-                    if letter == "ALL" then
-                        state.system_index = 1
-                    else
-                        for idx, s in ipairs(systems) do
-                            if s.label:upper():sub(1,1) == letter or s.id:upper():sub(1,1) == letter then
-                                state.system_index = idx
-                                break
-                            end
-                        end
-                    end
-                elseif state.prev_mode == state.MODE_GAME_LIST and current_sys then
-                    if letter == "ALL" then
-                        state.game_indices[state.system_index] = 1
-                    else
-                        for g_idx, g in ipairs(current_sys.games) do
-                            if g.name:upper():sub(1,1) == letter then
-                                state.game_indices[state.system_index] = g_idx
-                                break
-                            end
-                        end
-                    end
-                end
-                state.mode = state.prev_mode or state.MODE_CAROUSEL
-                state.save()
-            end,
-            function()
-                state.mode = state.prev_mode or state.MODE_CAROUSEL
-                state.save()
-            end
-        )
+    elseif action == "NEXT_TAB" then
+        state.cycle_tab(1)
+        update_active_accent()
+        return
+    elseif action == "TAB_1" then
+        state.set_tab(state.TAB_CONSOLES)
+        update_active_accent()
+        return
+    elseif action == "TAB_2" then
+        state.set_tab(state.TAB_APPS)
+        update_active_accent()
+        return
+    elseif action == "TAB_3" then
+        state.set_tab(state.TAB_FAVORITES)
+        update_active_accent()
+        return
+    elseif action == "TAB_4" then
+        state.set_tab(state.TAB_SETTINGS)
+        update_active_accent()
         return
     end
 
-    -- Global modal shortcuts
-    if action == "MENU" then
-        state.prev_mode = state.mode
-        state.mode = state.MODE_OPTIONS
-        state.save()
-        return
-    elseif action == "SECONDARY" then
-        state.prev_mode = state.mode
-        state.mode = state.MODE_SEARCH
-        state.save()
-        return
-    end
+    -- 2. View-specific Navigation & Action Handling
+    if state.active_view == state.VIEW_CAROUSEL then
+        local items = get_active_tab_items()
+        local count = #items
+        local cur_idx = state.carousel_indices[state.current_tab] or 1
 
-    -- 2. Base View Navigation
-    if state.mode == state.MODE_CAROUSEL then
         if action == "LEFT" then
-            state.system_index = state.system_index - 1
-            if state.system_index < 1 then state.system_index = #systems end
-            state.save()
+            if count > 0 then
+                cur_idx = cur_idx - 1
+                if cur_idx < 1 then cur_idx = count end
+                state.carousel_indices[state.current_tab] = cur_idx
+                state.save()
+                update_active_accent()
+            end
         elseif action == "RIGHT" then
-            state.system_index = state.system_index + 1
-            if state.system_index > #systems then state.system_index = 1 end
-            state.save()
+            if count > 0 then
+                cur_idx = cur_idx + 1
+                if cur_idx > count then cur_idx = 1 end
+                state.carousel_indices[state.current_tab] = cur_idx
+                state.save()
+                update_active_accent()
+            end
         elseif action == "CONFIRM" then
-            state.mode = state.MODE_GAME_LIST
-            state.save()
+            if state.current_tab == state.TAB_CONSOLES then
+                state.active_view = state.VIEW_GAMES
+                state.save()
+                update_active_accent()
+            elseif state.current_tab == state.TAB_APPS and count > 0 then
+                local app = items[cur_idx]
+                local payload = dispatcher.prepare_payload("APP", app)
+                state.launch_context = payload
+                state.prev_view = state.VIEW_CAROUSEL
+                state.active_view = state.VIEW_LAUNCH
+                dispatcher.execute(payload)
+            elseif state.current_tab == state.TAB_FAVORITES and count > 0 then
+                local fav = items[cur_idx]
+                local payload = dispatcher.prepare_payload("FAVORITE", fav)
+                state.launch_context = payload
+                state.prev_view = state.VIEW_CAROUSEL
+                state.active_view = state.VIEW_LAUNCH
+                dispatcher.execute(payload)
+            end
+        elseif action == "MENU" then
+            state.set_tab(state.TAB_SETTINGS)
+            update_active_accent()
         end
-    elseif state.mode == state.MODE_GAME_LIST then
-        local current_sys = systems[state.system_index]
-        local current_game_idx = state.game_indices[state.system_index] or 1
-        local total_games = current_sys and #current_sys.games or 0
+
+    elseif state.active_view == state.VIEW_GAMES then
+        local sys_idx = state.carousel_indices[state.TAB_CONSOLES] or 1
+        local cur_sys = systems[sys_idx]
+        local g_idx = state.game_indices[sys_idx] or 1
+        local total_games = cur_sys and #cur_sys.games or 0
 
         if action == "UP" then
-            if current_game_idx > 1 then
-                state.game_indices[state.system_index] = current_game_idx - 1
+            if g_idx > 1 then
+                state.game_indices[sys_idx] = g_idx - 1
                 state.save()
             end
         elseif action == "DOWN" then
-            if current_game_idx < total_games then
-                state.game_indices[state.system_index] = current_game_idx + 1
+            if g_idx < total_games then
+                state.game_indices[sys_idx] = g_idx + 1
                 state.save()
             end
-        elseif action == "BACK" then
-            state.mode = state.MODE_CAROUSEL
+        elseif action == "LEFT" then
+            state.game_indices[sys_idx] = math.max(1, g_idx - 5)
             state.save()
+        elseif action == "RIGHT" then
+            state.game_indices[sys_idx] = math.min(total_games, g_idx + 5)
+            state.save()
+        elseif action == "BACK" then
+            state.active_view = state.VIEW_CAROUSEL
+            state.save()
+            update_active_accent()
         elseif action == "CONFIRM" then
-            if current_sys and total_games > 0 then
-                local selected_game = current_sys.games[current_game_idx]
-                dispatcher.launch(current_sys, selected_game)
+            if cur_sys and total_games > 0 then
+                local selected_game = cur_sys.games[g_idx]
+                local payload = dispatcher.prepare_payload("ROM", cur_sys, selected_game)
+                state.launch_context = payload
+                state.prev_view = state.VIEW_GAMES
+                state.active_view = state.VIEW_LAUNCH
+                dispatcher.execute(payload)
             end
+        elseif action == "MENU" then
+            state.set_tab(state.TAB_SETTINGS)
+            update_active_accent()
+        end
+
+    elseif state.active_view == state.VIEW_SETTINGS then
+        local total_s = #settings
+        local cur_row = state.settings_row_index
+        local item = settings[cur_row]
+
+        if action == "UP" then
+            if cur_row > 1 then
+                state.settings_row_index = cur_row - 1
+                state.save()
+            end
+        elseif action == "DOWN" then
+            if cur_row < total_s then
+                state.settings_row_index = cur_row + 1
+                state.save()
+            end
+        elseif action == "LEFT" then
+            if item then
+                if item.clamped then
+                    item.selected = math.max(1, item.selected - 1)
+                else
+                    item.selected = ((item.selected - 2 + #item.options) % #item.options) + 1
+                end
+                if item.id == "accent" then
+                    theme.set_accent(item.values[item.selected])
+                    state.active_accent = item.values[item.selected]
+                end
+            end
+        elseif action == "RIGHT" or action == "CONFIRM" then
+            if item then
+                if item.clamped then
+                    item.selected = math.min(#item.options, item.selected + 1)
+                else
+                    item.selected = (item.selected % #item.options) + 1
+                end
+                if item.id == "accent" then
+                    theme.set_accent(item.values[item.selected])
+                    state.active_accent = item.values[item.selected]
+                end
+            end
+        elseif action == "BACK" then
+            state.set_tab(state.TAB_CONSOLES)
+            update_active_accent()
+        end
+
+    elseif state.active_view == state.VIEW_LAUNCH then
+        if action == "BACK" or action == "CONFIRM" then
+            state.active_view = state.prev_view or state.VIEW_CAROUSEL
+            update_active_accent()
         end
     end
 end
@@ -141,12 +249,17 @@ function love.update(dt)
 
     input.update(dt, on_action)
 
-    if state.mode == state.MODE_CAROUSEL then
-        carousel.update(dt, state.system_index, #systems)
-    elseif state.mode == state.MODE_GAME_LIST then
-        local current_sys = systems[state.system_index]
-        local g_idx = state.game_indices[state.system_index] or 1
-        two_pane.update(dt, g_idx, current_sys and #current_sys.games or 0)
+    if state.active_view == state.VIEW_CAROUSEL then
+        local items = get_active_tab_items()
+        local idx = state.carousel_indices[state.current_tab] or 1
+        carousel.update(dt, idx, #items)
+    elseif state.active_view == state.VIEW_GAMES then
+        local sys_idx = state.carousel_indices[state.TAB_CONSOLES] or 1
+        local cur_sys = systems[sys_idx]
+        local g_idx = state.game_indices[sys_idx] or 1
+        two_pane.update(dt, g_idx, cur_sys and #cur_sys.games or 0)
+    elseif state.active_view == state.VIEW_SETTINGS then
+        settings_view.update(dt, state.settings_row_index, #settings)
     end
 end
 
@@ -163,40 +276,34 @@ function love.draw()
     local c = theme.colors
     love.graphics.clear(c.bg)
 
-    local current_sys = systems[state.system_index]
+    local sys_idx = state.carousel_indices[state.TAB_CONSOLES] or 1
+    local cur_sys = systems[sys_idx]
 
-    if state.mode == state.MODE_CAROUSEL or state.mode == state.MODE_OPTIONS or state.mode == state.MODE_SEARCH then
-        carousel.draw(systems, state.system_index)
-        status_bar.draw(current_sys, false)
-        hint_bar.draw(false, state.system_index, #systems)
-    elseif state.mode == state.MODE_GAME_LIST then
-        local g_idx = state.game_indices[state.system_index] or 1
-        two_pane.draw(current_sys, g_idx)
-        status_bar.draw(current_sys, true)
-        hint_bar.draw(true, g_idx, current_sys and #current_sys.games or 0)
-    end
+    if state.active_view == state.VIEW_CAROUSEL then
+        local items = get_active_tab_items()
+        local idx = state.carousel_indices[state.current_tab] or 1
+        local tab_names = { "CONSOLES", "APPS", "FAVORITES", "SETTINGS" }
 
-    -- Overlay Modals
-    if state.mode == state.MODE_OPTIONS then
-        options_modal.draw()
-    elseif state.mode == state.MODE_SEARCH then
-        local scope_name = (state.prev_mode == state.MODE_GAME_LIST and current_sys) and current_sys.label or "Consoles"
-        local match_count = 0
-        local sel_let = search_modal.letters[search_modal.current_index]
-        if state.prev_mode == state.MODE_GAME_LIST and current_sys then
-            for _, g in ipairs(current_sys.games) do
-                if sel_let == "ALL" or g.name:upper():sub(1,1) == sel_let then
-                    match_count = match_count + 1
-                end
-            end
-        else
-            for _, s in ipairs(systems) do
-                if sel_let == "ALL" or s.label:upper():sub(1,1) == sel_let or s.id:upper():sub(1,1) == sel_let then
-                    match_count = match_count + 1
-                end
-            end
-        end
-        search_modal.draw(scope_name, match_count)
+        carousel.draw(items, idx)
+        tab_bar.draw(state.current_tab)
+        status_bar.draw(tab_names[state.current_tab], nil)
+        hint_bar.draw("carousel", idx, #items)
+
+    elseif state.active_view == state.VIEW_GAMES then
+        local g_idx = state.game_indices[sys_idx] or 1
+        two_pane.draw(cur_sys, g_idx)
+        status_bar.draw("CONSOLES", cur_sys and cur_sys.label)
+        hint_bar.draw("games", g_idx, cur_sys and #cur_sys.games or 0)
+
+    elseif state.active_view == state.VIEW_SETTINGS then
+        settings_view.draw(settings, state.settings_row_index)
+        status_bar.draw("SETTINGS", nil)
+        hint_bar.draw("settings", state.settings_row_index, #settings)
+
+    elseif state.active_view == state.VIEW_LAUNCH then
+        launch_view.draw(state.launch_context)
+        status_bar.draw("LAUNCHING", nil)
+        hint_bar.draw("launch", 1, 1)
     end
 end
 
