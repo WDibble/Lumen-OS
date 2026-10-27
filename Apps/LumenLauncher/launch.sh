@@ -45,7 +45,7 @@ while true; do
     rm -f "$EXEC_CFG"
 
     # Run Love2D Native Launcher
-    "$LOVE_BIN" "$LAUNCHER_DIR"
+    "$LOVE_BIN" "$LAUNCHER_DIR" >> "$LOG_DIR/launcher.log" 2>&1
     EXIT_CODE=$?
 
     END_TIME=$(date +%s)

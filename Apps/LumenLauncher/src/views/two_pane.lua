@@ -25,10 +25,43 @@ function two_pane.update(dt, selected_game_idx, total_games)
     two_pane.scroll_y = two_pane.scroll_y + (two_pane.target_scroll_y - two_pane.scroll_y) * (1.0 - math.exp(-18.0 * dt))
 end
 
+local console_hero_cache = {}
+
+local function get_hero_image(sys_id)
+    if console_hero_cache[sys_id] ~= nil then
+        return console_hero_cache[sys_id]
+    end
+    local candidate_paths = {
+        "/mnt/SDCARD/Emus/" .. sys_id .. "/icon.png",
+        "../../Emus/" .. sys_id .. "/icon.png"
+    }
+    for _, path in ipairs(candidate_paths) do
+        local f = io.open(path, "rb")
+        if f then
+            local bytes = f:read("*a")
+            f:close()
+            local ok, file_data = pcall(love.filesystem.newFileData, bytes, "icon.png")
+            if ok and file_data then
+                local ok2, img_data = pcall(love.image.newImageData, file_data)
+                if ok2 and img_data then
+                    local ok3, img = pcall(love.graphics.newImage, img_data)
+                    if ok3 and img then
+                        console_hero_cache[sys_id] = img
+                        return img
+                    end
+                end
+            end
+        end
+    end
+    console_hero_cache[sys_id] = false
+    return false
+end
+
 function two_pane.draw(system, selected_game_idx)
     local m = theme.metrics
     local c = theme.colors
     local r = theme.radii
+    local f = theme.fonts
 
     local games = system.games
     local total_games = #games
@@ -43,34 +76,62 @@ function two_pane.draw(system, selected_game_idx)
     love.graphics.setLineWidth(1)
     love.graphics.rectangle("line", m.left_x, m.left_y, m.left_w, m.left_h, r.card, r.card)
 
-    -- Hero Artwork Placeholder Stage
+    -- Hero Artwork Pedestal Stage
     local art_x = m.left_x + 24
     local art_y = m.left_y + 24
     local art_w = m.left_w - 48
-    local art_h = 280
+    local art_h = 240
 
     love.graphics.setColor(c.card)
     love.graphics.rectangle("fill", art_x, art_y, art_w, art_h, r.sub, r.sub)
     love.graphics.setColor(c.card_border)
     love.graphics.rectangle("line", art_x, art_y, art_w, art_h, r.sub, r.sub)
 
-    -- Hero System Tag & Glow
-    love.graphics.setColor(c.accent)
-    love.graphics.printf(system.id, art_x, art_y + 110, art_w, "center")
-    love.graphics.setColor(c.text_muted)
-    love.graphics.printf("BOX ART PREVIEW", art_x, art_y + 144, art_w, "center")
+    -- Ambient Radial Glow on Pedestal
+    local pedestal_center_x = art_x + (art_w / 2)
+    local pedestal_center_y = art_y + (art_h / 2)
+    love.graphics.setColor(56/255, 189/255, 248/255, 0.20)
+    love.graphics.circle("fill", pedestal_center_x, pedestal_center_y, 90)
+
+    -- Console Image
+    local hero_img = get_hero_image(system.id)
+    if hero_img then
+        love.graphics.setColor(1, 1, 1, 1)
+        local iw, ih = hero_img:getDimensions()
+        local scale = 190 / math.max(iw, ih)
+        local ix = pedestal_center_x - (iw * scale / 2)
+        local iy = pedestal_center_y - (ih * scale / 2)
+        love.graphics.draw(hero_img, ix, iy, 0, scale, scale)
+    else
+        love.graphics.setColor(c.accent)
+        if f.title then love.graphics.setFont(f.title) end
+        love.graphics.printf(system.id, art_x, art_y + 90, art_w, "center")
+    end
 
     -- Title & Info
     if selected_game then
+        local text_y = art_y + art_h + 20
+        if f.header then love.graphics.setFont(f.header) end
         love.graphics.setColor(c.text_pri)
-        love.graphics.printf(selected_game.name, art_x, art_y + art_h + 24, art_w, "left")
+        love.graphics.printf(selected_game.name, art_x, text_y, art_w, "left")
 
+        if f.body then love.graphics.setFont(f.body) end
         love.graphics.setColor(c.accent)
-        love.graphics.print(system.label, art_x, art_y + art_h + 80)
+        love.graphics.print(system.label, art_x, text_y + 64)
 
+        if f.sub then love.graphics.setFont(f.sub) end
         love.graphics.setColor(c.text_muted)
-        love.graphics.print("File: " .. (selected_game.file or ""), art_x, art_y + art_h + 110)
-        love.graphics.print("Platform: " .. system.manufacturer .. " (" .. system.year .. ")", art_x, art_y + art_h + 134)
+        love.graphics.print("File: " .. (selected_game.file or ""), art_x, text_y + 94)
+        love.graphics.print(system.manufacturer .. "  -  " .. system.year, art_x, text_y + 118)
+
+        -- Badge: total titles
+        local badge_str = string.format("%d TITLES", total_games)
+        love.graphics.setColor(c.badge_bg)
+        love.graphics.rectangle("fill", art_x, text_y + 150, 110, 28, r.pill, r.pill)
+        love.graphics.setColor(c.accent)
+        love.graphics.rectangle("line", art_x, text_y + 150, 110, 28, r.pill, r.pill)
+        if f.tiny then love.graphics.setFont(f.tiny) end
+        love.graphics.printf(badge_str, art_x, text_y + 156, 110, "center")
     end
 
     -------------------------------------------------------------------------
@@ -94,12 +155,15 @@ function two_pane.draw(system, selected_game_idx)
         local is_selected = (idx == selected_game_idx)
 
         if is_selected then
-            -- Active row highlight
+            -- Active row highlight with cyan border
             love.graphics.setColor(c.card_active)
             love.graphics.rectangle("fill", m.right_x + 8, row_y + 4, m.right_w - 24, m.row_h - 8, r.pill, r.pill)
 
-            -- Cyan indicator pill
             love.graphics.setColor(c.accent)
+            love.graphics.setLineWidth(1.5)
+            love.graphics.rectangle("line", m.right_x + 8, row_y + 4, m.right_w - 24, m.row_h - 8, r.pill, r.pill)
+
+            -- Cyan indicator pill
             love.graphics.rectangle("fill", m.right_x + 8, row_y + 8, 4, m.row_h - 16, r.dot, r.dot)
 
             love.graphics.setColor(c.text_pri)
@@ -108,12 +172,14 @@ function two_pane.draw(system, selected_game_idx)
         end
 
         -- Game Title
-        love.graphics.print(game.name, m.right_x + 24, row_y + 16)
+        if f.body then love.graphics.setFont(f.body) end
+        love.graphics.print(game.name, m.right_x + 28, row_y + 18)
 
         -- File Extension / Rom Tag
         local ext = game.file and game.file:match("%.(%w+)$") or "ROM"
+        if f.tiny then love.graphics.setFont(f.tiny) end
         love.graphics.setColor(is_selected and c.accent or c.text_muted)
-        love.graphics.printf(ext:upper(), m.right_x + m.right_w - 90, row_y + 16, 60, "right")
+        love.graphics.printf(ext:upper(), m.right_x + m.right_w - 90, row_y + 20, 60, "right")
     end
 
     love.graphics.setScissor()

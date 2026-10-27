@@ -95,4 +95,4 @@ if [ -x "$LUMEN_SHELL" ]; then
 fi
 
 echo "=== [Lumen-OS] Preload Hook Completed ==="
-exit 1
+exit 0

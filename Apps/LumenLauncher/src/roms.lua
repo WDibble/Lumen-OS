@@ -84,6 +84,115 @@ local FALLBACK_SYSTEMS = {
             { name = "Persona 3 Portable", file = "Persona 3 Portable.iso" },
             { name = "WipEout Pulse", file = "WipEout Pulse.iso" }
         }
+    },
+    {
+        id = "NDS",
+        label = "Nintendo DS",
+        manufacturer = "Nintendo",
+        year = "2004",
+        launch = "/mnt/SDCARD/Emus/NDS/launch.sh",
+        extlist = { "nds", "zip", "7z" },
+        games = {
+            { name = "Mario Kart DS", file = "Mario Kart DS.nds" },
+            { name = "New Super Mario Bros", file = "New Super Mario Bros.nds" },
+            { name = "Pokemon HeartGold", file = "Pokemon HeartGold.nds" },
+            { name = "The World Ends With You", file = "The World Ends With You.nds" }
+        }
+    },
+    {
+        id = "DC",
+        label = "Sega Dreamcast",
+        manufacturer = "Sega",
+        year = "1998",
+        launch = "/mnt/SDCARD/Emus/DC/launch.sh",
+        extlist = { "chd", "cdi", "gdi" },
+        games = {
+            { name = "Crazy Taxi", file = "Crazy Taxi.chd" },
+            { name = "Jet Set Radio", file = "Jet Set Radio.chd" },
+            { name = "Shenmue", file = "Shenmue.chd" },
+            { name = "Sonic Adventure 2", file = "Sonic Adventure 2.chd" }
+        }
+    },
+    {
+        id = "PCE",
+        label = "PC Engine / TG-16",
+        manufacturer = "NEC",
+        year = "1987",
+        launch = "/mnt/SDCARD/Emus/PCE/launch.sh",
+        extlist = { "pce", "chd", "cue" },
+        games = {
+            { name = "Castlevania - Rondo of Blood", file = "Castlevania - Rondo of Blood.chd" },
+            { name = "Bonk's Adventure", file = "Bonk's Adventure.pce" },
+            { name = "Blazing Lazers", file = "Blazing Lazers.pce" }
+        }
+    },
+    {
+        id = "NEOGEO",
+        label = "SNK Neo Geo",
+        manufacturer = "SNK",
+        year = "1990",
+        launch = "/mnt/SDCARD/Emus/NEOGEO/launch.sh",
+        extlist = { "zip", "7z" },
+        games = {
+            { name = "Metal Slug 3", file = "mslug3.zip" },
+            { name = "Garou - Mark of the Wolves", file = "garou.zip" },
+            { name = "The King of Fighters 98", file = "kof98.zip" }
+        }
+    },
+    {
+        id = "FC",
+        label = "NES / Famicom",
+        manufacturer = "Nintendo",
+        year = "1983",
+        launch = "/mnt/SDCARD/Emus/FC/launch.sh",
+        extlist = { "nes", "zip" },
+        games = {
+            { name = "Super Mario Bros. 3", file = "Super Mario Bros 3.nes" },
+            { name = "Mega Man 2", file = "Mega Man 2.nes" },
+            { name = "Castlevania III - Dracula's Curse", file = "Castlevania III.nes" },
+            { name = "Metroid", file = "Metroid.nes" }
+        }
+    },
+    {
+        id = "GB",
+        label = "Game Boy",
+        manufacturer = "Nintendo",
+        year = "1989",
+        launch = "/mnt/SDCARD/Emus/GB/launch.sh",
+        extlist = { "gb", "zip" },
+        games = {
+            { name = "Pokemon Red Version", file = "Pokemon Red.gb" },
+            { name = "The Legend of Zelda - Link's Awakening", file = "Links Awakening.gb" },
+            { name = "Tetris", file = "Tetris.gb" },
+            { name = "Super Mario Land 2 - 6 Golden Coins", file = "Super Mario Land 2.gb" }
+        }
+    },
+    {
+        id = "GBC",
+        label = "Game Boy Color",
+        manufacturer = "Nintendo",
+        year = "1998",
+        launch = "/mnt/SDCARD/Emus/GBC/launch.sh",
+        extlist = { "gbc", "zip" },
+        games = {
+            { name = "Pokemon Crystal Version", file = "Pokemon Crystal.gbc" },
+            { name = "The Legend of Zelda - Oracle of Ages", file = "Oracle of Ages.gbc" },
+            { name = "The Legend of Zelda - Oracle of Seasons", file = "Oracle of Seasons.gbc" },
+            { name = "Shantae", file = "Shantae.gbc" }
+        }
+    },
+    {
+        id = "FBNEO",
+        label = "FinalBurn Arcade",
+        manufacturer = "Capcom / SNK",
+        year = "ARCADE",
+        launch = "/mnt/SDCARD/Emus/FBNEO/launch.sh",
+        extlist = { "zip", "7z" },
+        games = {
+            { name = "Street Fighter III 3rd Strike", file = "sfiii3.zip" },
+            { name = "Marvel vs. Capcom", file = "mvsc.zip" },
+            { name = "Alien vs. Predator", file = "avsp.zip" }
+        }
     }
 }
 

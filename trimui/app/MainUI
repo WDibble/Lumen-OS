@@ -1,0 +1,17 @@
+#!/bin/sh
+# Lumen OS Primary Shell Dispatcher
+# Replaces stock MainUI completely upon console boot
+# Target: Allwinner A133plus (TrimUI Smart Pro)
+
+# Check if MENU button is held at boot for recovery mode fallback
+if [ -e "/dev/input/event3" ]; then
+    if command -v evtest >/dev/null 2>&1; then
+        evtest --query /dev/input/event3 1 316 >/dev/null 2>&1
+        if [ $? -eq 10 ]; then
+            echo "[Lumen-OS] MENU held at boot, launching stock MainUI fallback"
+            exec /usr/trimui/bin/MainUI
+        fi
+    fi
+fi
+
+exec /mnt/SDCARD/Apps/LumenLauncher/launch.sh

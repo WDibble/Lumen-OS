@@ -52,7 +52,28 @@ theme.metrics = {
     right_y  = 64,
     right_w  = 780,
     right_h  = 592,
-    row_h    = 52
+    row_h    = 60
 }
+
+theme.fonts = {}
+
+function theme.init_fonts()
+    local font_path = "assets/font.ttf"
+    local has_file = io.open(font_path, "r")
+    if has_file then
+        has_file:close()
+        theme.fonts.title   = love.graphics.newFont(font_path, 22)
+        theme.fonts.header  = love.graphics.newFont(font_path, 20)
+        theme.fonts.body    = love.graphics.newFont(font_path, 16)
+        theme.fonts.sub     = love.graphics.newFont(font_path, 14)
+        theme.fonts.tiny    = love.graphics.newFont(font_path, 12)
+    else
+        theme.fonts.title   = love.graphics.newFont(22)
+        theme.fonts.header  = love.graphics.newFont(20)
+        theme.fonts.body    = love.graphics.newFont(16)
+        theme.fonts.sub     = love.graphics.newFont(14)
+        theme.fonts.tiny    = love.graphics.newFont(12)
+    end
+end
 
 return theme

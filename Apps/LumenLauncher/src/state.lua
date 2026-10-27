@@ -2,8 +2,11 @@ local state = {
     MODE_CAROUSEL = 1,
     MODE_GAME_LIST = 2,
     MODE_DISPATCH = 3,
+    MODE_OPTIONS = 4,
+    MODE_SEARCH = 5,
 
     mode = 1,
+    prev_mode = 1,
     system_index = 1,
     game_indices = {}, -- system_index -> selected_game_index
     scroll_offsets = {},
