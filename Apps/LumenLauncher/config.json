@@ -1,0 +1,7 @@
+{
+  "label": "Lumen Launcher",
+  "icon": "icon.png",
+  "launch": "launch.sh",
+  "description": "High-performance native Love2D launcher for Lumen-OS",
+  "useswap": 0
+}

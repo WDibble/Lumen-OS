@@ -1069,5 +1069,65 @@ class TestLumenNext(unittest.TestCase):
             self.assertIn(".trash/Imgs", t)
             self.assertIn("grep -F -x -q", t)
 
+    def test_42_native_lumen_launcher(self):
+        """Verify native Lumen Launcher files, conf.lua 11.5 spec, launch.sh crash guard, and config schema."""
+        launcher_dir = f"{REPO_ROOT}/Apps/LumenLauncher"
+        conf_lua = f"{launcher_dir}/conf.lua"
+        main_lua = f"{launcher_dir}/main.lua"
+        launch_sh = f"{launcher_dir}/launch.sh"
+        config_json = f"{launcher_dir}/config.json"
+        icon_png = f"{launcher_dir}/icon.png"
+
+        # 1. Core file existence
+        self.assertTrue(os.path.isfile(conf_lua), "Missing Apps/LumenLauncher/conf.lua")
+        self.assertTrue(os.path.isfile(main_lua), "Missing Apps/LumenLauncher/main.lua")
+        self.assertTrue(os.path.isfile(launch_sh), "Missing Apps/LumenLauncher/launch.sh")
+        self.assertTrue(os.access(launch_sh, os.X_OK), "Apps/LumenLauncher/launch.sh must be executable")
+        self.assertTrue(os.path.isfile(config_json), "Missing Apps/LumenLauncher/config.json")
+        self.assertTrue(os.path.isfile(icon_png), "Missing Apps/LumenLauncher/icon.png")
+
+        # 2. Verify conf.lua adheres to Love2D 11.5 720p spec
+        with open(conf_lua) as f:
+            conf_content = f.read()
+            self.assertIn('t.version = "11.5"', conf_content)
+            self.assertIn('t.window.width = 1280', conf_content)
+            self.assertIn('t.window.height = 720', conf_content)
+            self.assertIn('t.window.fullscreen = true', conf_content)
+            self.assertIn('t.window.vsync = 1', conf_content)
+            self.assertIn('t.modules.physics = false', conf_content)
+
+        # 3. Verify launch.sh has rapid crash guard and CPU governor scaling
+        with open(launch_sh) as f:
+            launch_content = f.read()
+            self.assertIn("RAPID_CRASH_COUNT", launch_content)
+            self.assertIn("next-hw cpu", launch_content)
+            self.assertIn("EXEC_CFG", launch_content)
+            self.assertIn("10", launch_content)
+
+        # 4. Verify config.json schema
+        with open(config_json) as f:
+            cfg = json.load(f)
+            self.assertEqual(cfg.get("label"), "Lumen Launcher")
+            self.assertEqual(cfg.get("icon"), "icon.png")
+            self.assertEqual(cfg.get("launch"), "launch.sh")
+
+        # 5. Verify all source modules exist
+        required_src = [
+            f"{launcher_dir}/src/theme.lua",
+            f"{launcher_dir}/src/audio.lua",
+            f"{launcher_dir}/src/input.lua",
+            f"{launcher_dir}/src/roms.lua",
+            f"{launcher_dir}/src/state.lua",
+            f"{launcher_dir}/src/dispatcher.lua",
+            f"{launcher_dir}/src/views/status_bar.lua",
+            f"{launcher_dir}/src/views/carousel.lua",
+            f"{launcher_dir}/src/views/two_pane.lua",
+            f"{launcher_dir}/src/views/hint_bar.lua"
+        ]
+        for src_file in required_src:
+            self.assertTrue(os.path.isfile(src_file), f"Missing module: {src_file}")
+            self.assertGreater(os.path.getsize(src_file), 0, f"Module is empty: {src_file}")
+
+
 if __name__ == "__main__":
     unittest.main()
