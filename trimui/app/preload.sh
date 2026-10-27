@@ -16,7 +16,7 @@ echo "=== [Lumen-OS] Preload Hook Started: $(date '+%Y-%m-%d %H:%M:%S') ==="
 export PATH="/mnt/SDCARD/System/bin:/mnt/SDCARD/System/scripts:${PATH:-/bin:/usr/bin:/usr/trimui/bin}"
 export LD_LIBRARY_PATH="/mnt/SDCARD/System/lib:/usr/trimui/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-# Check for pending resume-at-boot command
+# 1. Check for pending resume-at-boot command
 CMD_FILE="/mnt/SDCARD/trimui/app/cmd_to_run.sh"
 
 if [ -f "$CMD_FILE" ]; then
@@ -63,6 +63,35 @@ if [ -f "$CMD_FILE" ]; then
     sync
     chmod +x "$TMP_CMD"
     exec "$TMP_CMD"
+fi
+
+# 2. Check if MENU button is held down at boot to force fallback to MainUI
+MENU_HELD=0
+if [ -x "/mnt/SDCARD/System/bin/next-hw" ]; then
+    if /mnt/SDCARD/System/bin/next-hw button --check MENU 2>/dev/null; then
+        MENU_HELD=1
+    fi
+elif [ -e "/dev/input/event3" ] && command -v evtest >/dev/null 2>&1; then
+    evtest --query /dev/input/event3 1 316 >/dev/null 2>&1
+    [ $? -eq 10 ] && MENU_HELD=1
+fi
+
+if [ "$MENU_HELD" -eq 1 ]; then
+    echo "[Lumen-OS] RECOVERY MODE: MENU button held at boot. Falling back to stock MainUI."
+    if [ -x "/mnt/SDCARD/System/bin/next-hw" ]; then
+        /mnt/SDCARD/System/bin/next-hw led --hex FF8800 --cycles 2 2>/dev/null || true
+    fi
+    exit 1
+fi
+
+# 3. Boot directly into native Lumen Launcher as the default OS interface
+LUMEN_SHELL="/mnt/SDCARD/Apps/LumenLauncher/launch.sh"
+if [ -x "$LUMEN_SHELL" ]; then
+    echo "[Lumen-OS] Booting directly into Lumen Native OS Shell..."
+    if [ -x "/mnt/SDCARD/System/bin/next-hw" ]; then
+        /mnt/SDCARD/System/bin/next-hw led --hex 38BDF8 --cycles 1 2>/dev/null || true
+    fi
+    exec "$LUMEN_SHELL"
 fi
 
 echo "=== [Lumen-OS] Preload Hook Completed ==="
